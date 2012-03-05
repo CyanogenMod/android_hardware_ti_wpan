@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Bluetooth SCO Music Enable</string>
+    <string name="app_name">BluetoothSCOApp</string>
+
+<string name="BTenable">Enable Music via Media Player</string>
+<string name="Copyright">Texas Instruments</string>
+</resources>
