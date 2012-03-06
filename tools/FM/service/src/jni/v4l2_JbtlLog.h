@@ -48,7 +48,7 @@
 /*
  * Log a error log mesage.
  */
-#define V4L2_JBTL_LOGE(...) ALOGW( __VA_ARGS__)
+#define V4L2_JBTL_LOGE(...) ALOGE( __VA_ARGS__)
 #define V4L2_JBTL_LOGE_IF(cond, ...) ALOGE_IF(cond, __VA_ARGS__)
 
 
