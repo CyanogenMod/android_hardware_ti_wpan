@@ -325,12 +325,12 @@ static int nativeJFmTx_SetRdsTransmissionMode(JNIEnv *env, jobject obj, jlong jC
 {
 
 /*    FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_SetRdsTransmissionMode(): Entered");
+    ALOGD("nativeJFmTx_SetRdsTransmissionMode(): Entered");
 
     FmTxStatus  status =FM_TX_SetRdsTransmissionMode(fmTxContext,(FmTxRdsTransmissionMode)mode);
-    LOGD("nativeJFmTx_SetRdsTransmissionMode: FM_TX_SetRdsTransmissionMode() returned %d",(int)status);
+    ALOGD("nativeJFmTx_SetRdsTransmissionMode: FM_TX_SetRdsTransmissionMode() returned %d",(int)status);
 */
-    LOGD("nativeJFmTx_SetRdsTransmissionMode(): Exit");
+    ALOGD("nativeJFmTx_SetRdsTransmissionMode(): Exit");
     return 0;
 }
 
@@ -339,12 +339,12 @@ static int nativeJFmTx_GetRdsTransmissionMode(JNIEnv *env, jobject obj, jlong jC
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_GetRdsTransmissionMode(): Entered");
+    ALOGD("nativeJFmTx_GetRdsTransmissionMode(): Entered");
 
     FmTxStatus  status =FM_TX_GetRdsTransmissionMode(fmTxContext);
-    LOGD("nativeJFmTx_GetRdsTransmissionMode: FM_TX_GetRdsTransmissionMode() returned %d",(int)status);
+    ALOGD("nativeJFmTx_GetRdsTransmissionMode: FM_TX_GetRdsTransmissionMode() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_GetRdsTransmissionMode(): Exit");
+    ALOGD("nativeJFmTx_GetRdsTransmissionMode(): Exit");
     return status;
 }
 
@@ -355,11 +355,11 @@ static int nativeJFmTx_SetRdsTextPsMsg(JNIEnv *env, jobject obj, jlong jContextV
 /*    FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
     const char *psStr = (char*) env->GetStringUTFChars(psString, &iscopy);
 
-    LOGD("nativeJFmTx_SetRdsTextPsMsg(): Entered");
-    LOGD("nativeJFmTx_SetRdsTextPsMsg():--> psStr= %s",psStr);
+    ALOGD("nativeJFmTx_SetRdsTextPsMsg(): Entered");
+    ALOGD("nativeJFmTx_SetRdsTextPsMsg():--> psStr= %s",psStr);
 
     FmTxStatus  status =FM_TX_SetRdsTextPsMsg(fmTxContext,(const FMC_U8 *)psStr,(FMC_UINT)length);
-    LOGD("nativeJFmTx_SetRdsTextPsMsg: FM_TX_SetRdsTextPsMsg() returned %d",(int)status);
+    ALOGD("nativeJFmTx_SetRdsTextPsMsg: FM_TX_SetRdsTextPsMsg() returned %d",(int)status);
 */
     struct v4l2_ext_controls_kfmapp vec;
     struct v4l2_ext_control_kfmapp vctrls;
@@ -374,15 +374,15 @@ static int nativeJFmTx_SetRdsTextPsMsg(JNIEnv *env, jobject obj, jlong jContextV
     vctrls.size = strlen(rds_text) + 1;
     vec.controls = &vctrls;
 
-    LOGE("Entered RDS  PS Name is - %s\n",vctrls.string);
+    ALOGE("Entered RDS  PS Name is - %s\n",vctrls.string);
     res = ioctl(radio_fd, VIDIOC_S_EXT_CTRLS, &vec);
     if(res < 0)
     {
-        LOGE("Failed to set FM Tx RDS Radio PS Name\n");
+        ALOGE("Failed to set FM Tx RDS Radio PS Name\n");
         return res;
     }
 
-    LOGD("nativeJFmTx_SetRdsTextPsMsg(): Exit");
+    ALOGD("nativeJFmTx_SetRdsTextPsMsg(): Exit");
 
     return res;
 }
@@ -391,12 +391,12 @@ static int nativeJFmTx_GetRdsTextPsMsg(JNIEnv *env, jobject obj, jlong jContextV
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_GetRdsTextPsMsg(): Entered");
+    ALOGD("nativeJFmTx_GetRdsTextPsMsg(): Entered");
 
     FmTxStatus  status =FM_TX_GetRdsTextPsMsg(fmTxContext);
-    LOGD("nativeJFmTx_GetRdsTextPsMsg: FM_TX_GetRdsTextPsMsg() returned %d",(int)status);
+    ALOGD("nativeJFmTx_GetRdsTextPsMsg: FM_TX_GetRdsTextPsMsg() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_GetRdsTextPsMsg(): Exit");
+    ALOGD("nativeJFmTx_GetRdsTextPsMsg(): Exit");
 
     return status;
 }
@@ -405,16 +405,16 @@ static int nativeJFmTx_WriteRdsRawData(JNIEnv *env, jobject obj, jlong jContextV
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_WriteRdsRawData(): Entered");
+    ALOGD("nativeJFmTx_WriteRdsRawData(): Entered");
 
     jboolean iscopy;
     const char *rawData = (char*) env->GetStringUTFChars(msg, &iscopy);
 
 
     FmTxStatus  status =FM_TX_WriteRdsRawData(fmTxContext,(const FMC_U8 *)rawData,(FMC_UINT)length);
-    LOGD("nativeJFmTx_WriteRdsRawData: FM_TX_WriteRdsRawData() returned %d",(int)status);
+    ALOGD("nativeJFmTx_WriteRdsRawData: FM_TX_WriteRdsRawData() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_WriteRdsRawData(): Exit");
+    ALOGD("nativeJFmTx_WriteRdsRawData(): Exit");
     return status;
 }
 
@@ -423,12 +423,12 @@ static int nativeJFmTx_ReadRdsRawData(JNIEnv *env, jobject obj, jlong jContextVa
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_ReadRdsRawData(): Entered");
+    ALOGD("nativeJFmTx_ReadRdsRawData(): Entered");
 
     FmTxStatus  status =FM_TX_ReadRdsRawData(fmTxContext);
-    LOGD("nativeJFmTx_ReadRdsRawData: FM_TX_ReadRdsRawData() returned %d",(int)status);
+    ALOGD("nativeJFmTx_ReadRdsRawData: FM_TX_ReadRdsRawData() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_ReadRdsRawData(): Exit");
+    ALOGD("nativeJFmTx_ReadRdsRawData(): Exit");
     return status;
 }
 */
@@ -438,7 +438,7 @@ static int nativeJFmTx_SetMuteMode(JNIEnv *env, jobject obj, jlong jContextValue
    struct v4l2_control vt;
    int status;
 
-   LOGD("nativeJFmTx_SetMuteMode(): Entered");
+   ALOGD("nativeJFmTx_SetMuteMode(): Entered");
    vt.id = V4L2_CID_AUDIO_MUTE;
 
    if (mode == 0)
@@ -449,19 +449,19 @@ static int nativeJFmTx_SetMuteMode(JNIEnv *env, jobject obj, jlong jContextValue
    status = ioctl(radio_fd,VIDIOC_S_CTRL,&vt);
    if(status < 0)
    {
-     LOGD("nativeJFmTx_SetMuteMode(): Faile returned %d\n", status);
+     ALOGD("nativeJFmTx_SetMuteMode(): Faile returned %d\n", status);
      return status;
    }
 
-    LOGD("nativeJFmTx_SetMuteMode(): Exit");
+    ALOGD("nativeJFmTx_SetMuteMode(): Exit");
     return status;
 }
 
 static int nativeJFmTx_GetMuteMode(JNIEnv *env, jobject obj, jlong jContextValue)
 {
-    LOGD("nativeJFmTx_GetMuteMode(): Entered");
+    ALOGD("nativeJFmTx_GetMuteMode(): Entered");
 
-    LOGD("nativeJFmTx_GetMuteMode(): Exit");
+    ALOGD("nativeJFmTx_GetMuteMode(): Exit");
     return 0;
 }
 /*
@@ -469,12 +469,12 @@ static int nativeJFmTx_SetRdsPsDisplayMode(JNIEnv *env, jobject obj, jlong jCont
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_SetRdsPsDisplayMode(): Entered");
+    ALOGD("nativeJFmTx_SetRdsPsDisplayMode(): Entered");
 
     FmTxStatus  status =FM_TX_SetRdsPsDisplayMode(fmTxContext,(FmcRdsPsDisplayMode)displayMode);
-    LOGD("nativeJFmTx_SetRdsPsDisplayMode: FM_TX_SetRdsPsDisplayMode() returned %d",(int)status);
+    ALOGD("nativeJFmTx_SetRdsPsDisplayMode: FM_TX_SetRdsPsDisplayMode() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_SetRdsPsDisplayMode(): Exit");
+    ALOGD("nativeJFmTx_SetRdsPsDisplayMode(): Exit");
     return status;
 }
 
@@ -483,12 +483,12 @@ static int nativeJFmTx_GetRdsPsDisplayMode(JNIEnv *env, jobject obj, jlong jCont
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_GetRdsPsDisplayMode(): Entered");
+    ALOGD("nativeJFmTx_GetRdsPsDisplayMode(): Entered");
 
     FmTxStatus  status =FM_TX_GetRdsPsDisplayMode(fmTxContext);
-    LOGD("nativeJFmTx_GetRdsPsDisplayMode: FM_TX_GetRdsPsDisplayMode() returned %d",(int)status);
+    ALOGD("nativeJFmTx_GetRdsPsDisplayMode: FM_TX_GetRdsPsDisplayMode() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_GetRdsPsDisplayMode(): Exit");
+    ALOGD("nativeJFmTx_GetRdsPsDisplayMode(): Exit");
     return status;
 }
 
@@ -505,7 +505,7 @@ static int nativeJFmTx_SetRdsTextRtMsg(JNIEnv *env, jobject obj, jlong jContextV
     int res;
     char rds_text[100];
 
-    LOGD("nativeJFmTx_SetRdsTextRtMsg(): Entered");
+    ALOGD("nativeJFmTx_SetRdsTextRtMsg(): Entered");
 
 
     vec.ctrl_class = V4L2_CTRL_CLASS_FM_TX;
@@ -515,18 +515,18 @@ static int nativeJFmTx_SetRdsTextRtMsg(JNIEnv *env, jobject obj, jlong jContextV
     vctrls.size = strlen(rtMsg) + 1;
     vec.controls = &vctrls;
 
-    LOGD("nativeJFmTx_SetRdsTextRtMsg():--> RTMsg = %s",vctrls.string);
+    ALOGD("nativeJFmTx_SetRdsTextRtMsg():--> RTMsg = %s",vctrls.string);
     res = ioctl(radio_fd, VIDIOC_S_EXT_CTRLS, &vec);
     if(res < 0)
     {
-            LOGE("Failed to set FM Tx RDS Radio text");
+            ALOGE("Failed to set FM Tx RDS Radio text");
         return res;
     }
 
     //    FmTxStatus  status =FM_TX_SetRdsTextRtMsg(fmTxContext,(FmcRdsRtMsgType)msgType,(const FMC_U8 *)rtMsg,(FMC_UINT)length);
-    //    LOGD("nativeJFmTx_SetRdsTextRtMsg: FM_TX_SetRdsTextRtMsg() returned %d",(int)status);
+    //    ALOGD("nativeJFmTx_SetRdsTextRtMsg: FM_TX_SetRdsTextRtMsg() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_SetRdsTextRtMsg(): Exit");
+    ALOGD("nativeJFmTx_SetRdsTextRtMsg(): Exit");
     return 0;
 }
 
@@ -535,11 +535,11 @@ static int nativeJFmTx_GetRdsTextRtMsg(JNIEnv *env, jobject obj, jlong jContextV
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_GetRdsTextRtMsg(): Entered");
+    ALOGD("nativeJFmTx_GetRdsTextRtMsg(): Entered");
     FmTxStatus  status =FM_TX_GetRdsTextRtMsg(fmTxContext);
-    LOGD("nativeJFmTx_GetRdsTextRtMsg: FM_TX_SetRdsTextRtMsg() returned %d",(int)status);
+    ALOGD("nativeJFmTx_GetRdsTextRtMsg: FM_TX_SetRdsTextRtMsg() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_GetRdsTextRtMsg(): Exit");
+    ALOGD("nativeJFmTx_GetRdsTextRtMsg(): Exit");
     return status;
 }
 
@@ -548,12 +548,12 @@ static int nativeJFmTx_SetRdsTransmittedGroupsMask(JNIEnv *env, jobject obj, jlo
 {
 
 /*    FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_SetRdsTransmittedGroupsMask(): Entered");
+    ALOGD("nativeJFmTx_SetRdsTransmittedGroupsMask(): Entered");
 
     FmTxStatus  status =FM_TX_SetRdsTransmittedGroupsMask(fmTxContext,(FmTxRdsTransmittedGroupsMask)fieldMask);
-    LOGD("nativeJFmTx_SetRdsTransmittedGroupsMask: FM_TX_SetRdsTransmittedGroupsMask() returned %d",(int)status);
+    ALOGD("nativeJFmTx_SetRdsTransmittedGroupsMask: FM_TX_SetRdsTransmittedGroupsMask() returned %d",(int)status);
 */
-    LOGD("nativeJFmTx_SetRdsTransmittedGroupsMask(): Exit");
+    ALOGD("nativeJFmTx_SetRdsTransmittedGroupsMask(): Exit");
     return 0;
 }
 
@@ -562,12 +562,12 @@ static int nativeJFmTx_GetRdsTransmittedGroupsMask(JNIEnv *env, jobject obj, jlo
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_GetRdsTransmittedGroupsMask(): Entered");
+    ALOGD("nativeJFmTx_GetRdsTransmittedGroupsMask(): Entered");
 
     FmTxStatus  status =FM_TX_GetRdsTransmittedGroupsMask(fmTxContext);
-    LOGD("nativeJFmTx_GetRdsTransmittedGroupsMask: FM_TX_GetRdsTransmittedGroupsMask() returned %d",(int)status);
+    ALOGD("nativeJFmTx_GetRdsTransmittedGroupsMask: FM_TX_GetRdsTransmittedGroupsMask() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_GetRdsTransmittedGroupsMask(): Exit");
+    ALOGD("nativeJFmTx_GetRdsTransmittedGroupsMask(): Exit");
     return status;
 }
 
@@ -575,12 +575,12 @@ static int nativeJFmTx_SetRdsTrafficCodes(JNIEnv *env, jobject obj, jlong jConte
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_SetRdsTrafficCodes(): Entered");
+    ALOGD("nativeJFmTx_SetRdsTrafficCodes(): Entered");
 
     FmTxStatus  status =FM_TX_SetRdsTrafficCodes(fmTxContext,(FmcRdsTaCode)taCode,(FmcRdsTpCode)tpCode);
-    LOGD("nativeJFmTx_SetRdsTrafficCodes: FM_TX_SetRdsTrafficCodes() returned %d",(int)status);
+    ALOGD("nativeJFmTx_SetRdsTrafficCodes: FM_TX_SetRdsTrafficCodes() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_SetRdsTrafficCodes(): Exit");
+    ALOGD("nativeJFmTx_SetRdsTrafficCodes(): Exit");
     return status;
 }
 
@@ -588,12 +588,12 @@ static int nativeJFmTx_GetRdsTrafficCodes(JNIEnv *env, jobject obj, jlong jConte
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_GetRdsTrafficCodes(): Entered");
+    ALOGD("nativeJFmTx_GetRdsTrafficCodes(): Entered");
 
     FmTxStatus  status =FM_TX_GetRdsTrafficCodes(fmTxContext);
-    LOGD("nativeJFmTx_GetRdsTrafficCodes: FM_TX_GetRdsTrafficCodes() returned %d",(int)status);
+    ALOGD("nativeJFmTx_GetRdsTrafficCodes: FM_TX_GetRdsTrafficCodes() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_GetRdsTrafficCodes(): Exit");
+    ALOGD("nativeJFmTx_GetRdsTrafficCodes(): Exit");
     return status;
 }
 
@@ -601,12 +601,12 @@ static int nativeJFmTx_SetRdsMusicSpeechFlag(JNIEnv *env, jobject obj, jlong jCo
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_SetRdsMusicSpeechFlag(): Entered");
+    ALOGD("nativeJFmTx_SetRdsMusicSpeechFlag(): Entered");
 
     FmTxStatus  status =FM_TX_SetRdsMusicSpeechFlag(fmTxContext,(FmcRdsMusicSpeechFlag)musicSpeechFlag);
-    LOGD("nativeJFmTx_SetRdsMusicSpeechFlag: FM_TX_SetRdsMusicSpeechFlag() returned %d",(int)status);
+    ALOGD("nativeJFmTx_SetRdsMusicSpeechFlag: FM_TX_SetRdsMusicSpeechFlag() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_SetRdsMusicSpeechFlag(): Exit");
+    ALOGD("nativeJFmTx_SetRdsMusicSpeechFlag(): Exit");
     return status;
 }
 
@@ -615,12 +615,12 @@ static int nativeJFmTx_GetRdsMusicSpeechFlag(JNIEnv *env, jobject obj, jlong jCo
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_GetRdsMusicSpeechFlag(): Entered");
+    ALOGD("nativeJFmTx_GetRdsMusicSpeechFlag(): Entered");
 
     FmTxStatus  status =FM_TX_GetRdsMusicSpeechFlag(fmTxContext);
-    LOGD("nativeJFmTx_GetRdsMusicSpeechFlag: FM_TX_GetRdsMusicSpeechFlag() returned %d",(int)status);
+    ALOGD("nativeJFmTx_GetRdsMusicSpeechFlag: FM_TX_GetRdsMusicSpeechFlag() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_GetRdsMusicSpeechFlag(): Exit");
+    ALOGD("nativeJFmTx_GetRdsMusicSpeechFlag(): Exit");
     return status;
 }
 
@@ -628,12 +628,12 @@ static int nativeJFmTx_SetRdsExtendedCountryCode(JNIEnv *env, jobject obj, jlong
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_SetRdsExtendedCountryCode(): Entered");
+    ALOGD("nativeJFmTx_SetRdsExtendedCountryCode(): Entered");
 
     FmTxStatus  status =FM_TX_SetRdsECC(fmTxContext,(FmcRdsExtendedCountryCode)ecc);
-    LOGD("nativeJFmTx_SetRdsExtendedCountryCode: FM_TX_SetRdsECC() returned %d",(int)status);
+    ALOGD("nativeJFmTx_SetRdsExtendedCountryCode: FM_TX_SetRdsECC() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_SetRdsExtendedCountryCode(): Exit");
+    ALOGD("nativeJFmTx_SetRdsExtendedCountryCode(): Exit");
     return status;
 }
 
@@ -641,12 +641,12 @@ static int nativeJFmTx_GetRdsExtendedCountryCode(JNIEnv *env, jobject obj, jlong
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_GetRdsExtendedCountryCode(): Entered");
+    ALOGD("nativeJFmTx_GetRdsExtendedCountryCode(): Entered");
 
     FmTxStatus  status =FM_TX_GetRdsECC(fmTxContext);
-    LOGD("nativeJFmTx_GetRdsExtendedCountryCode: FM_TX_GetRdsECC() returned %d",(int)status);
+    ALOGD("nativeJFmTx_GetRdsExtendedCountryCode: FM_TX_GetRdsECC() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_GetRdsExtendedCountryCode(): Exit");
+    ALOGD("nativeJFmTx_GetRdsExtendedCountryCode(): Exit");
     return status;
 }
 
@@ -654,13 +654,13 @@ static int nativeJFmTx_ChangeAudioSource(JNIEnv *env, jobject obj, jlong jContex
 {
 
     FmTxContext * fmTxContext = (FmTxContext *)jContextValue;
-    LOGD("nativeJFmTx_ChangeAudioSource(): Entered");
+    ALOGD("nativeJFmTx_ChangeAudioSource(): Entered");
 
-    LOGD(" txSource = %d , Sampling frequency = %d ",(int) txSource, (int) eSampleFreq);
+    ALOGD(" txSource = %d , Sampling frequency = %d ",(int) txSource, (int) eSampleFreq);
     FmTxStatus  status =FM_TX_ChangeAudioSource(fmTxContext,(FmTxAudioSource)txSource,(ECAL_SampleFrequency)eSampleFreq);
-    LOGD("nativeJFmTx_ChangeAudioSource: FM_TX_ChangeAudioSource() returned %d",(int)status);
+    ALOGD("nativeJFmTx_ChangeAudioSource: FM_TX_ChangeAudioSource() returned %d",(int)status);
 
-    LOGD("nativeJFmTx_ChangeAudioSource(): Exit");
+    ALOGD("nativeJFmTx_ChangeAudioSource(): Exit");
     return status;
 }
 */
@@ -691,7 +691,7 @@ static int nativeJFmTx_SetRdsPtyCode(JNIEnv *env, jobject obj, jlong jContextVal
 	struct v4l2_ext_controls_kfmapp vec;
 	struct v4l2_ext_control_kfmapp vctrls;
 
-	LOGE("nativeJFmTx_SetRdsPtyCode(): Entered");
+	ALOGE("nativeJFmTx_SetRdsPtyCode(): Entered");
 
 	vec.ctrl_class = V4L2_CTRL_CLASS_FM_TX;
 	vec.count = 1;
@@ -703,11 +703,11 @@ static int nativeJFmTx_SetRdsPtyCode(JNIEnv *env, jobject obj, jlong jContextVal
 	res = ioctl(radio_fd, VIDIOC_S_EXT_CTRLS, &vec);
 	if(res < 0)
 	{
-		LOGE("Failed to set FM Tx RDS PTY\n");
+		ALOGE("Failed to set FM Tx RDS PTY\n");
 		return res;
 	}
 
-	LOGE("nativeJFmTx_SetRdsPtyCode(): Exit");
+	ALOGE("nativeJFmTx_SetRdsPtyCode(): Exit");
 
 	return res;
 }
@@ -723,7 +723,7 @@ static int nativeJFmTx_SetRdsPiCode(JNIEnv *env, jobject obj, jlong jContextValu
 	struct v4l2_ext_control_kfmapp vctrls;
 	int res;
 
-	LOGD("nativeJFmTx_SetRdsPiCode(): Enter");
+	ALOGD("nativeJFmTx_SetRdsPiCode(): Enter");
 
 	vec.ctrl_class = V4L2_CTRL_CLASS_FM_TX;
 	vec.count = 1;
@@ -735,11 +735,11 @@ static int nativeJFmTx_SetRdsPiCode(JNIEnv *env, jobject obj, jlong jContextValu
 	res = ioctl(radio_fd, VIDIOC_S_EXT_CTRLS, &vec);
 	if(res < 0)
 	{
-		LOGE("Failed to set FM Tx RDS PI Code\n");
+		ALOGE("Failed to set FM Tx RDS PI Code\n");
 		return res;
 	}
 
-	LOGD("Setting FM Tx RDS PI Code is Succesful\n");
+	ALOGD("Setting FM Tx RDS PI Code is Succesful\n");
 
 	return res;
 }
@@ -755,22 +755,22 @@ static int nativeJFmTx_SetRdsAfCode(JNIEnv *env, jobject obj, jlong jContextValu
 
     sprintf(str, "%d", afCode);
 
-    LOGD("nativeJFmTx_SetRdsAfCode(): Enter");
+    ALOGD("nativeJFmTx_SetRdsAfCode(): Enter");
 
     fd = open(FMTX_RDS_AF_SYSFS_ENTRY, O_RDWR);
     if (fd < 0) {
-        LOGD("Can't open %s", FMTX_RDS_AF_SYSFS_ENTRY);
+        ALOGD("Can't open %s", FMTX_RDS_AF_SYSFS_ENTRY);
         return -1;
     }
 
     /* Need max 6 cahrs to set AF between 75000 KHz to 108000 KHz */
     res = write(fd, str, 6);
     if(res <= 0) {
-        LOGD("Failed to set FM TX RDS AF Frequency\n");
+        ALOGD("Failed to set FM TX RDS AF Frequency\n");
         goto exit;
     }
 
-    LOGD("FM RDS Alternate Frequency Set is succesfull\n");
+    ALOGD("FM RDS Alternate Frequency Set is succesfull\n");
 exit:
     close(fd);
     return res;
@@ -798,7 +798,7 @@ static int nativeJFmTx_SetPowerLevel(JNIEnv *env, jobject obj, jlong jContextVal
 	struct v4l2_ext_control_kfmapp vctrls;
 	int res;
 
-	LOGD("nativeJFmTx_SetPowerLevel(): Enter and power level = %d\n",powerLevel);
+	ALOGD("nativeJFmTx_SetPowerLevel(): Enter and power level = %d\n",powerLevel);
 
 	vec.ctrl_class = V4L2_CTRL_CLASS_FM_TX;
 	vec.count = 1;
@@ -810,11 +810,11 @@ static int nativeJFmTx_SetPowerLevel(JNIEnv *env, jobject obj, jlong jContextVal
 	res = ioctl(radio_fd, VIDIOC_S_EXT_CTRLS, &vec);
 	if(res < 0)
 	{
-		LOGE("Failed to set FM Tx power level\n");
+		ALOGE("Failed to set FM Tx power level\n");
 		return res;
 	}
 
-	LOGE("Setting FM Tx Power level to ---> %d\n", 122 - vctrls.value);
+	ALOGE("Setting FM Tx Power level to ---> %d\n", 122 - vctrls.value);
 
 	return res;
 }

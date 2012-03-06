@@ -53,15 +53,15 @@
 #define VERBOSE
 #ifdef ANDROID
 #define LOG_TAG "uim-sysfs"
-#define UIM_ERR(fmt, arg...)  LOGE("uim:"fmt"\n" , ##arg)
+#define UIM_ERR(fmt, arg...)  ALOGE("uim:"fmt"\n" , ##arg)
 #if defined(UIM_DEBUG)          /* limited debug messages */
-#define UIM_START_FUNC()      LOGE("uim: Inside %s", __FUNCTION__)
-#define UIM_DBG(fmt, arg...)  LOGE("uim:"fmt"\n" , ## arg)
+#define UIM_START_FUNC()      ALOGE("uim: Inside %s", __FUNCTION__)
+#define UIM_DBG(fmt, arg...)  ALOGE("uim:"fmt"\n" , ## arg)
 #define UIM_VER(fmt, arg...)
 #elif defined(VERBOSE)          /* very verbose */
-#define UIM_START_FUNC()      LOGE("uim: Inside %s", __FUNCTION__)
-#define UIM_DBG(fmt, arg...)  LOGE("uim:"fmt"\n" , ## arg)
-#define UIM_VER(fmt, arg...)  LOGE("uim:"fmt"\n" , ## arg)
+#define UIM_START_FUNC()      ALOGE("uim: Inside %s", __FUNCTION__)
+#define UIM_DBG(fmt, arg...)  ALOGE("uim:"fmt"\n" , ## arg)
+#define UIM_VER(fmt, arg...)  ALOGE("uim:"fmt"\n" , ## arg)
 #else /* error msgs only */
 #define UIM_START_FUNC()
 #define UIM_DBG(fmt, arg...)

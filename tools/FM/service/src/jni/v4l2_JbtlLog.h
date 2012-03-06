@@ -24,45 +24,45 @@
 /*
  * Log a verbose log mesage.
  */
-#define V4L2_JBTL_LOGV(...) LOGV( __VA_ARGS__)
-#define V4L2_JBTL_LOGV_IF(cond, ...) LOGV_IF(cond, __VA_ARGS__)
+#define V4L2_JBTL_LOGV(...) ALOGV( __VA_ARGS__)
+#define V4L2_JBTL_LOGV_IF(cond, ...) ALOGV_IF(cond, __VA_ARGS__)
 
 /*
  * Log a debug log mesage.
  */
-#define V4L2_JBTL_LOGD(...) LOGD( __VA_ARGS__)
-#define V4L2_JBTL_LOGD_IF(cond, ...) LOGD_IF(cond, __VA_ARGS__)
+#define V4L2_JBTL_LOGD(...) ALOGD( __VA_ARGS__)
+#define V4L2_JBTL_LOGD_IF(cond, ...) ALOGD_IF(cond, __VA_ARGS__)
 
 /*
  * Log a informational log mesage.
  */
-#define V4L2_JBTL_LOGI(...) LOGI( __VA_ARGS__)
-#define V4L2_JBTL_LOGI_IF(cond, ...) LOGI_IF(cond, __VA_ARGS__)
+#define V4L2_JBTL_LOGI(...) ALOGI( __VA_ARGS__)
+#define V4L2_JBTL_LOGI_IF(cond, ...) ALOGI_IF(cond, __VA_ARGS__)
 
 /*
  * Log a warning log mesage.
  */
-#define V4L2_JBTL_LOGW(...) LOGW( __VA_ARGS__)
-#define V4L2_JBTL_LOGW_IF(cond, ...) LOGW_IF(cond, __VA_ARGS__)
+#define V4L2_JBTL_LOGW(...) ALOGW( __VA_ARGS__)
+#define V4L2_JBTL_LOGW_IF(cond, ...) ALOGW_IF(cond, __VA_ARGS__)
 
 /*
  * Log a error log mesage.
  */
-#define V4L2_JBTL_LOGE(...) LOGW( __VA_ARGS__)
-#define V4L2_JBTL_LOGE_IF(cond, ...) LOGE_IF(cond, __VA_ARGS__)
+#define V4L2_JBTL_LOGE(...) ALOGW( __VA_ARGS__)
+#define V4L2_JBTL_LOGE_IF(cond, ...) ALOGE_IF(cond, __VA_ARGS__)
 
 
 /*
  * Log a fatal log message.
  */
-#define V4L2_JBTL_LOG_FATAL(...) LOG_FATAL(__VA_ARGS__)
-#define V4L2_JBTL_LOG_FATAL_IF(cond, ...) LOG_FATAL_IF(cond, __VA_ARGS__)
+#define V4L2_JBTL_LOG_FATAL(...) ALOG_FATAL(__VA_ARGS__)
+#define V4L2_JBTL_LOG_FATAL_IF(cond, ...) ALOG_FATAL_IF(cond, __VA_ARGS__)
 
 
 /*
  * Assertion
  */
-#define V4L2_JBTL_LOG_ASSERT(cond, ...) LOG_ASSERT(cond, __VA_ARGS__)
+#define V4L2_JBTL_LOG_ASSERT(cond, ...) ALOG_ASSERT(cond, __VA_ARGS__)
 
 
 #endif // _V4L2_JBTL_LOG__H
