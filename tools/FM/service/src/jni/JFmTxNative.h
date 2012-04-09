@@ -179,11 +179,6 @@ extern void setJBtlEnv(JNIEnv *env);
 #define V4L2_CID_FM_TX_CLASS                    (V4L2_CTRL_CLASS_FM_TX | 1)
 
 #define V4L2_CID_TUNE_PREEMPHASIS               (V4L2_CID_FM_TX_CLASS_BASE + 112)
-enum v4l2_preemphasis {
-	V4L2_PREEMPHASIS_DISABLED       = 0,
-	V4L2_PREEMPHASIS_50_uS          = 1,
-	V4L2_PREEMPHASIS_75_uS          = 2,
-};
 
 #define V4L2_CID_RDS_TX_DEVIATION               (V4L2_CID_FM_TX_CLASS_BASE + 1)
 #define V4L2_CID_RDS_TX_PI                      (V4L2_CID_FM_TX_CLASS_BASE + 2)
