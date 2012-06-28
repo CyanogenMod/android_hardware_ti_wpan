@@ -50,7 +50,6 @@ import android.content.DialogInterface;
 import com.ti.fm.FmRadio;
 import com.ti.fm.FmRadioIntent;
 import com.ti.fm.IFmConstants;
-import android.server.*;
 /**************************************************************/
 
 public class FmTx extends Activity implements View.OnClickListener,
