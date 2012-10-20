@@ -1,0 +1,9 @@
+Change-Id: I53fd67ff7af6996265531fc75f9ef01ccec441db
+Code-Review+2: Ricardo Cerqueira <cyanogenmod@cerqueira.org>
+Verified+1: Ricardo Cerqueira <cyanogenmod@cerqueira.org>
+Code-Review+1: Arne Coucheron <arco68@gmail.com>
+Submitted-by: Ricardo Cerqueira <cyanogenmod@cerqueira.org>
+Submitted-at: Sat, 20 Oct 2012 07:41:25 -0700
+Reviewed-on: http://review.cyanogenmod.com/23684
+Project: CyanogenMod/android_hardware_ti_wpan
+Branch: refs/heads/jellybean
