@@ -10,7 +10,8 @@ PRODUCT_PACKAGES += uim-sysfs \
         FmService \
         libfmradio \
         fmradioif \
-        com.ti.fm.fmradioif.xml
+        com.ti.fm.fmradioif.xml \
+        libbt-vendor
 
 #copy firmware
 PRODUCT_COPY_FILES += \
