@@ -25,7 +25,6 @@ include $(CLEAR_VARS)
 
 LOCAL_C_INCLUDES :=\
 	$(JNI_H_INCLUDE) \
-        external/bluetooth/bluez/include \
         external/tinyalsa/include/tinyalsa
 
 
