@@ -36,7 +36,7 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE := libbt-vendor
 LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_PATH := $(ANDROID_PRODUCT_OUT)/system/vendor/lib
+LOCAL_MODULE_PATH := $(PRODUCT_OUT)/system/vendor/lib
 
 include $(BUILD_SHARED_LIBRARY)
 
