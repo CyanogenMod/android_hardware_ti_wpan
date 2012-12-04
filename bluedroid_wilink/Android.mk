@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+ifeq ($(TARGET_DEVICE),panda)
+
 LOCAL_PATH := $(call my-dir)
 BLUEDROID_PATH := external/bluetooth/bluedroid/
 include $(CLEAR_VARS)
@@ -38,3 +40,4 @@ LOCAL_MODULE_PATH := $(ANDROID_PRODUCT_OUT)/system/vendor/lib
 
 include $(BUILD_SHARED_LIBRARY)
 
+endif # panda
