@@ -67,7 +67,7 @@ int ti_op(bt_vendor_opcode_t opcode, void **param) {
     int fd;
     int *fd_array = (int (*)[]) param;
 
-    ALOGI("vendor op - %d", opcode);
+    ALOGV("vendor op - %d", opcode);
     switch(opcode)
     {
         case BT_VND_OP_USERIAL_OPEN:
