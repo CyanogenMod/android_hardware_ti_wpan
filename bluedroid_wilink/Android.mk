@@ -37,4 +37,3 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_PATH := $(ANDROID_PRODUCT_OUT)/system/vendor/lib
 
 include $(BUILD_SHARED_LIBRARY)
-
