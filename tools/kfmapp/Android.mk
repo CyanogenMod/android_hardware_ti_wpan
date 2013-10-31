@@ -16,6 +16,10 @@ LOCAL_C_INCLUDES:= $(TINYALSA_PATH)/include/
 
 LOCAL_CFLAGS:= -g -c -W -Wall -O2 -D_POSIX_SOURCE
 
+ifeq ($(TARGET_PRODUCT), full_omap5sevm)
+LOCAL_CFLAGS += -DENABLE_OMAP5_FM
+endif # ENABLE_OMAP5_FM
+
 LOCAL_SRC_FILES:= \
         kfmapp.c
 

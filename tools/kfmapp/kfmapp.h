@@ -1,7 +1,7 @@
 /*
  *  TI FM kernel driver's sample application.
  *
- *  Copyright (C) 2010 Texas Instruments
+ *  Copyright (C) 2012 Texas Instruments
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2 as
@@ -26,6 +26,7 @@
 #define FMRX_BAND_SYSFS_ENTRY    "/sys/class/video4linux/radio0/fmrx_band"
 #define FMRX_RDS_AF_SYSFS_ENTRY    "/sys/class/video4linux/radio0/fmrx_rds_af"
 #define FMRX_RSSI_LVL_SYSFS_ENTRY    "/sys/class/video4linux/radio0/fmrx_rssi_lvl"
+#define FMRX_COMP_SCAN_SYSFS_ENTRY    "/sys/class/video4linux/radio0/fmrx_comp_scan"
 
 #define FMTX_RDS_AF_SYSFS_ENTRY    "/sys/class/video4linux/radio0/fmtx_rds_af"
 
