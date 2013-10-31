@@ -139,6 +139,8 @@ public class JFmRx {
 
        void fmRxCmdSetRdsAfSwitchMode(JFmRx context, JFmRxStatus status, int command, long value);
 
+       void fmRxCmdSetWrapSeekMode(JFmRx context, JFmRxStatus status, int command, long value);
+
        void fmRxCmdGetRdsAfSwitchMode(JFmRx context, JFmRxStatus status, int command, long value);
 
        void fmRxCmdDisableAudio(JFmRx context, JFmRxStatus status, int command, long value);
@@ -397,7 +399,7 @@ public class JFmRx {
     }
 
     public static enum JFmRxBand implements IJFmEnum<Integer> {
-       FMC_BAND_EUROPE_US(0x00), FMC_BAND_JAPAN(0x01);
+       FMC_BAND_EUROPE_US(0x00), FMC_BAND_JAPAN(0x01), FMC_BAND_RUSSIAN(0x02), FMC_BAND_WEATHER(0x03);
 
        private final int band;
 
@@ -436,6 +438,20 @@ public class JFmRx {
 
        public Integer getValue() {
           return rfDependentMuteMode;
+       }
+    }
+
+    public static enum JFmRxWrapSeekMode implements IJFmEnum<Integer> {
+       FM_RX_WRAP_SEEK_MODE_ON(0x01), FM_RX_WRAP_SEEK_MODE_OFF(0x00);
+
+       private final int WrapSeekMode;
+
+       private JFmRxWrapSeekMode(int WrapSeekMode) {
+          this.WrapSeekMode = WrapSeekMode;
+       }
+
+       public Integer getValue() {
+          return WrapSeekMode;
        }
     }
 
@@ -1152,6 +1168,26 @@ public class JFmRx {
 
     }
 
+    public JFmRxStatus setWrapSeekMode(JFmRxWrapSeekMode jWrapSeekMode) {
+       JFmLog.d(TAG, "setWrapSeekMode: entered");
+       JFmRxStatus jFmRxStatus;
+
+       try {
+          int fmStatus = nativeJFmRx_SetWrapSeekMode(context.getValue(), jWrapSeekMode
+                .getValue());
+          jFmRxStatus = JFmUtils.getEnumConst(JFmRxStatus.class, fmStatus);
+          JFmLog.d(TAG, "After nativeJFmRx_SetWrapSeekMode, status = "
+                + jFmRxStatus.toString());
+       } catch (Exception e) {
+          JFmLog.e(TAG, "setWrapSeekMode: exception during nativeJFmRx_SetWrapSeekMode ("
+                + e.toString() + ")");
+          jFmRxStatus = JFmRxStatus.FAILED;
+       }
+
+       JFmLog.d(TAG, "setWrapSeekMode: exiting");
+       return jFmRxStatus;
+
+    }
     public JFmRxStatus setRdsAfSwitchMode(JFmRxRdsAfSwitchMode jRdsAfSwitchMode) {
        //JFmLog.d(TAG, "setRdsAfSwitchMode: entered");
        JFmRxStatus jFmRxStatus;
@@ -1413,6 +1449,8 @@ public class JFmRx {
     private static native int nativeJFmRx_DisableAudioRouting(long contextValue);
 
     private static native int nativeJFmRx_SetRdsAfSwitchMode(long contextValue, int jRdsAfSwitchMode);
+
+    private static native int nativeJFmRx_SetWrapSeekMode(long contextValue, int jWrapSeekMode);
 
     private static native int nativeJFmRx_GetRdsAfSwitchMode(long contextValue);
 
@@ -2478,6 +2516,30 @@ public class JFmRx {
          // JFmLog.d(TAG, "nativeCb_fmRxCmdGetRdsGroupMask: calling callback");
 
           callback.fmRxCmdGetRdsGroupMask(mJFmRx, rxStatus, cmd, value);
+
+       }
+
+    }
+
+    @SuppressWarnings("unused")
+    public static void nativeCb_fmRxCmdSetWrapSeekMode(long contextValue, int status, int cmd,
+          long value) {
+
+       JFmLog.d(TAG, "nativeCb_fmRxCmdSetWrapSeekMode: entered");
+
+       JFmRx mJFmRx = getJFmRx(contextValue);
+
+       if (mJFmRx != null) {
+
+          ICallback callback = mJFmRx.callback;
+
+        //   JFmLog.d(TAG, "nativeCb_fmRxCmdSetRdsAfSwitchMode: converting callback args");
+
+          JFmRxStatus rxStatus = JFmUtils.getEnumConst(JFmRxStatus.class, status);
+
+         // JFmLog.d(TAG, "nativeCb_fmRxCmdSetRdsAfSwitchMode: calling callback");
+
+          callback.fmRxCmdSetWrapSeekMode(mJFmRx, rxStatus, cmd, value);
 
        }
 

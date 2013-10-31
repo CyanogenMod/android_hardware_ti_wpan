@@ -56,6 +56,11 @@ void nativeJFmRx_Callback(long context, int status,
 void nativeJFmRx_RadioText_Callback(int status, bool resetDisplay,
             unsigned char * msg, int len, int startIndex,
             int repertoire) ;
+
+/*Callback for FM Complete Scan*/
+
+void nativeJFmRx_CompleteScan_Callback(int status,
+            unsigned int * StationData, int station_count);
 } //extern "C"
 
 static JavaVM *g_jVM = NULL;
@@ -64,10 +69,17 @@ static jclass _sJClass;
 typedef pthread_t       THREAD_HANDLE;
 THREAD_HANDLE   p_threadHandle;         /* Thread Handle for RDS data  */
 static bool isThreadCreated = false;
+
+static bool isCompleteScanThreadCreated = false;
 static int radio_fd;
+static int wrap_seek;
 //snd_ctl_t *fm_snd_ctrl;
 long jContext;
 volatile bool g_stopCommListener = false;
+volatile bool DoCompScanOnly = false;
+volatile bool PauseRdsThread = false;
+volatile bool StoppedRdsRead = false;
+volatile bool wait_before_poll = true;
 
 static int chanl_spacing=200000;
 
@@ -84,11 +96,11 @@ static jmethodID _sMethodId_nativeCb_fmRxAfSwitchFreqFailed;
 static jmethodID _sMethodId_nativeCb_fmRxAfSwitchStart;
 static jmethodID _sMethodId_nativeCb_fmRxAfSwitchComplete;
 static jmethodID _sMethodId_nativeCb_fmRxAfListChanged;
-static jmethodID _sMethodId_nativeCb_fmRxCompleteScanDone;
 #endif
 
 /*Commented the FM RX RDS callbacks functionality end*/
 
+static jmethodID _sMethodId_nativeCb_fmRxCompleteScanDone;
 
 static jmethodID _sMethodId_nativeCb_fmRxPsChanged;
 static jmethodID _sMethodId_nativeCb_fmRxRadioText;
@@ -125,6 +137,7 @@ static jmethodID _sMethodId_nativeCb_fmRxCmdSetRdsSystem;
 static jmethodID _sMethodId_nativeCb_fmRxCmdSetRdsGroupMask;
 static jmethodID _sMethodId_nativeCb_fmRxCmdGetRdsGroupMask;
 static jmethodID _sMethodId_nativeCb_fmRxCmdSetRdsAfSwitchMode;
+static jmethodID _sMethodId_nativeCb_fmRxCmdSetWrapSeekMode;
 static jmethodID _sMethodId_nativeCb_fmRxCmdGetRdsAfSwitchMode;
 static jmethodID _sMethodId_nativeCb_fmRxCmdDisableAudio;
 static jmethodID _sMethodId_nativeCb_fmRxCmdDestroy;
@@ -260,48 +273,107 @@ void rds_decode(int blkno, int byte1, int byte2)
 
 void *entryFunctionForRdsThread(void *data)
 {
-  unsigned char buf[600];
-  int radio_fd;
-  int ret,index;
-  struct pollfd pfd;
+    unsigned char buf[600];
+    int radio_fd, fd;
+    int ret,index, num_stations, i, status = 0, res;
+    struct pollfd pfd;
+    unsigned char stations[410*4];
+    unsigned int station_data[410];
+    static char cmd='2';
+    unsigned char rds_mode = FM_RDS_ENABLE;
+    struct v4l2_tuner vt;
 
-  radio_fd = (int)data;
 
-  V4L2_JBTL_LOGD(" entryFunctionForRdsThread: Entering.g_stopCommListener %d \n",g_stopCommListener);
+    radio_fd = (int)data;
 
-  while(!g_stopCommListener)
-  {
+    V4L2_JBTL_LOGD(" entryFunctionForRdsThread: Entering.g_stopCommListener %d \n",g_stopCommListener);
 
-  V4L2_JBTL_LOGD("RDS thread running..\n");
-
-  while(1){
-      memset(&pfd, 0, sizeof(pfd));
-      pfd.fd = radio_fd;
-      pfd.events = POLLIN;
-      ret = poll(&pfd, 1, 10);
-      if (ret == 0){
-          /* Break the poll after RDS data available */
-          break;
-      }
-  }
-
-    ret = read(radio_fd,buf,500);
-    if(ret < 0)
-    {  V4L2_JBTL_LOGD("NO RDS data to read..\n");
-    return NULL;
-    }
-
-    else if( ret > 0)
+    while(!g_stopCommListener)
     {
+        V4L2_JBTL_LOGD("Complete Scan/RDS thread started \n");
 
-    V4L2_JBTL_LOGD(" RDS data to read is available..\n");
-       for(index=0;index<ret;index+=3)
-         rds_decode(buf[index+2] & 0x7,buf[index+1],buf[index]);
+        while(1) {
+            memset(&pfd, 0, sizeof(pfd));
+            pfd.fd = radio_fd;
+            pfd.events = POLLPRI | POLLIN | POLLRDNORM;
+            pfd.revents = 0;
+            ret = poll(&pfd, 1, 1000);
+            V4L2_JBTL_LOGD("pfd.revents = %d and required = %d\n",pfd.revents, (POLLIN | POLLRDNORM));
+            if ((pfd.revents == (POLLPRI | POLLIN)) || (pfd.revents == (POLLIN | POLLRDNORM))){
+                V4L2_JBTL_LOGD("Breaking Poll as Complete Scan/RDS data is ready to be read\n");
+                break;
+            }
+        }
+
+        ALOGD("Poll end....\n");
+
+        if(pfd.revents == (POLLPRI | POLLIN)) {
+
+            fd = open(FMRX_COMP_SCAN_SYSFS_ENTRY, O_RDWR);
+            if (fd < 0) {
+                ALOGE("Can't open %s", FMRX_COMP_SCAN_SYSFS_ENTRY);
+                return NULL;
+            }
+
+            ret = write(fd, &cmd, sizeof(char));
+            if(ret < 0){
+                ALOGE("Failed to read Complete Scan results\n");
+                return NULL;
+            }
+
+            num_stations = ret;
+
+            memset(&stations, 0, 410*4);
+
+            ret = read(radio_fd, &stations, ret*4);
+            if(ret < 0){
+                ALOGE("reading '/dev/radio0' failed %s\n",
+                        strerror(ret));
+                return NULL;
+            }
+
+            memset(&station_data, 0, sizeof(station_data));
+
+            for(i=0; i<4*num_stations; i=i+4) {
+                ret = ((stations[i+3] << 24) + (stations[i+2] << 16) + (stations[i+1] << 8) + (stations[i]));
+                station_data[i/4] = ret;
+                V4L2_JBTL_LOGD("Station[%d] = %d", i/4, ret);
+            }
+
+            nativeJFmRx_CompleteScan_Callback(status, &station_data[0], num_stations);
+            isThreadCreated = false;
+            StoppedRdsRead = false;
+            PauseRdsThread = false;
+
+            V4L2_JBTL_LOGD("Complete Scan thread is exiting..\n");
+
+            if (DoCompScanOnly == true) {
+                V4L2_JBTL_LOGD("Complete scan is done\n");
+                DoCompScanOnly = false;
+                return NULL;
+            }
+
+        } else if (pfd.revents == (POLLIN | POLLRDNORM)){
+            V4L2_JBTL_LOGD("RDS thread running..\n");
+            ret = read(radio_fd,buf,500);
+            if(ret < 0)
+            {  V4L2_JBTL_LOGD("NO RDS data to read..\n");
+                return NULL;
+            } else if( ret > 0)
+            {
+
+                V4L2_JBTL_LOGD(" RDS data to read is available..\n");
+                for(index=0;index<ret;index+=3)
+                    rds_decode(buf[index+2] & 0x7,buf[index+1],buf[index]);
+            }
+
+            StoppedRdsRead = true;
+            V4L2_JBTL_LOGD("RDS thread exiting..\n");
+
+        }
     }
-  }
 
-  V4L2_JBTL_LOGD("RDS thread exiting..\n");
-  return NULL;
+    return NULL;
 }
 
 int fm_read_tuner_capabilities(int radio_fd)
@@ -407,6 +479,9 @@ static int nativeJFmRx_Disable(JNIEnv *env, jobject obj, jlong jContextValue)
     g_stopCommListener = true;
     isThreadCreated = false;
 
+    // Complete Scan thread
+    isCompleteScanThreadCreated = false;
+
     close(radio_fd);
     nativeJFmRx_Callback(jContext,0,FM_RX_CMD_DISABLE,0);
 
@@ -424,17 +499,22 @@ static int nativeJFmRx_SetBand(JNIEnv *env, jobject obj,jlong jContextValue, jin
    int fd, res;
 
    switch(jFmBand) {
-       case 1:
+       case FM_BAND_WEATHER:
+           curr_band = '3';
+           break;
+       case FM_BAND_RUSSIAN:
+           curr_band = '2';
+           break;
+       case FM_BAND_JAPAN:
            curr_band = '1';
            break;
-       case 0:
+       case FM_BAND_EUROPE_US:
        default:
            curr_band = '0';
            break;
    }
 
    V4L2_JBTL_LOGD("nativeJFmRx_setBand(): EnteredjFmBand  %d",jFmBand);
-   V4L2_JBTL_LOGD("nativeJFmRx_setBand(): curr_band %d last_band %d",curr_band,last_band);
 
    fd = open(FM_BAND_SYSFS_ENTRY, O_RDWR);
    if (fd < 0) {
@@ -486,6 +566,7 @@ static int nativeJFmRx_Tune(JNIEnv *env, jobject obj,jlong jContextValue,jint us
         }
 
     vf.tuner = 0;
+    vf.type = V4L2_TUNER_RADIO;
     vf.frequency = rint(user_freq * 16 + 0.5);
 
     div = (vt.capability & V4L2_TUNER_CAP_LOW) ? 1000 : 1;
@@ -814,11 +895,11 @@ static int nativeJFmRx_Seek(JNIEnv *env, jobject obj,jlong jContextValue,jint jd
     int status, div;
 
     V4L2_JBTL_LOGD("nativeJFmRx_Seek(): Entered");
-    V4L2_JBTL_LOGD("Seeking %s.. and channel spacing is %d\n",jdirection?"up":"down", chanl_spacing);
+    V4L2_JBTL_LOGD("Seeking %s.. and wrap seek is %d\n",jdirection?"up":"down", wrap_seek);
     frq_seek.seek_upward = jdirection;
         frq_seek.type = (v4l2_tuner_type)1;
         frq_seek.spacing = chanl_spacing;
-        frq_seek.wrap_around = 0;
+        frq_seek.wrap_around = wrap_seek;
 
     errno = 0;
     status = ioctl(radio_fd,VIDIOC_S_HW_FREQ_SEEK,&frq_seek);
@@ -980,10 +1061,21 @@ static int  nativeJFmRx_DisableAudioRouting(JNIEnv *env, jobject obj,jlong jCont
    int status = 0 ;
     V4L2_JBTL_LOGD("nativeJFmRx_disableAudioRouting(): Entered");
 
-   nativeJFmRx_Callback(jContext,status, FM_RX_CMD_ENABLE_AUDIO,status);
+   nativeJFmRx_Callback(jContext,status, FM_RX_CMD_DISABLE_AUDIO,status);
 
     V4L2_JBTL_LOGD("nativeJFmRx_disableAudioRouting(): Exit");
      return FM_PENDING;
+}
+
+static int nativeJFmRx_SetWrapSeekMode(JNIEnv *env, jobject obj,jlong jContextValue,jint jWrapSeekMode)
+{
+    V4L2_JBTL_LOGD("nativeJFmRx_setWrapSeekMode(): Entered");
+
+    wrap_seek = jWrapSeekMode;
+
+    nativeJFmRx_Callback(jContext,0, FM_RX_CMD_SET_WRAP_SEEK_MODE,0);
+    V4L2_JBTL_LOGD("nativeJFmRx_setWrapSeekMode() wrap_seek mode = %d: Exit", wrap_seek);
+    return FM_PENDING;
 }
 
 static int nativeJFmRx_SetRdsAfSwitchMode(JNIEnv *env, jobject obj,jlong jContextValue,jint jRdsAfSwitchMode)
@@ -1161,13 +1253,68 @@ nativeJFmRx_Callback(jContext,status, FM_RX_CMD_GET_RDS_GROUP_MASK,status);
 
 static int nativeJFmRx_CompleteScan(JNIEnv *env, jobject obj, jlong jContextValue)
 {
+    int status =0;
+    int fd, res;
+    char cmd='1';
+    unsigned char rds_mode = FM_RDS_DISABLE;
+    struct v4l2_tuner vt;
 
-int status =0;
     ALOGD("nativeJFmRx_CompleteScan(): Entered");
 
-    //nativeJFmRx_Callback(jContext,status, FM_RX_CMD_COMPLETE_SCAN,status);
-    ALOGD("nativeJFmRx_CompleteScan(): Exit");
-     return FM_PENDING;
+    if(isThreadCreated == false)
+    {
+        V4L2_JBTL_LOGD(" nativeJFmRx_CompleteScan: creating thread !!! \n");
+        fd = open(FMRX_COMP_SCAN_SYSFS_ENTRY, O_RDWR);
+        if (fd < 0) {
+            ALOGE("Can't open %s", FMRX_COMP_SCAN_SYSFS_ENTRY);
+            return -1;
+        }
+
+        res = write(fd, &cmd, sizeof(char));
+        if(res <= 0){
+            ALOGE("Failed to Start Complete Scan\n");
+            goto exit;
+        }
+
+        close(fd);
+
+        g_stopCommListener = false;
+        PauseRdsThread = true;
+        wait_before_poll = false;
+        /* Create rds receive thread once */
+        status = pthread_create(&p_threadHandle,   /* Thread Handle. */
+                NULL,                               /* Default Atributes. */
+                entryFunctionForRdsThread,            /* Entry Function. */
+                (void *)radio_fd);           /* Parameters. */
+        if (status < 0)
+        {
+            V4L2_JBTL_LOGD(" nativeJFmRx_CompleteScan: Thread Creation FAILED !!! \n");
+            return FM_ERR_THREAD_CREATION_FAILED;
+        }
+
+        isThreadCreated = true;
+        DoCompScanOnly = true;
+
+    } else {
+        V4L2_JBTL_LOGD("Thread is running for RDS wait till it finishses the iteration\n");
+        fd = open(FMRX_COMP_SCAN_SYSFS_ENTRY, O_RDWR);
+        if (fd < 0) {
+            ALOGE("Can't open %s", FMRX_COMP_SCAN_SYSFS_ENTRY);
+            return -1;
+        }
+
+        res = write(fd, &cmd, sizeof(char));
+        if(res <= 0){
+            ALOGE("Failed to Start Complete Scan\n");
+            goto exit;
+        }
+
+        close(fd);
+    }
+
+exit:
+    nativeJFmRx_Callback(jContext,status, FM_RX_CMD_COMPLETE_SCAN,status);
+    return FM_PENDING;
 }
 
 static int nativeJFmRx_GetCompleteScanProgress(JNIEnv *env, jobject obj, jlong jContextValue)
@@ -1182,12 +1329,28 @@ int status =0;
 
 static int nativeJFmRx_StopCompleteScan(JNIEnv *env, jobject obj, jlong jContextValue)
 {
+    int fd, res;
+    char cmd='3';
 
     ALOGD("nativeJFmRx_StopCompleteScan(): Entered");
 
- //nativeJFmRx_Callback(jContext,status, FM_RX_CMD_STOP_COMPLETE_SCAN,status);
+    fd = open(FMRX_COMP_SCAN_SYSFS_ENTRY, O_RDWR);
+    if (fd < 0) {
+        ALOGE("Can't open %s", FMRX_COMP_SCAN_SYSFS_ENTRY);
+        return NULL;
+    }
+
+    res = write(fd, &cmd, sizeof(char));
+    if(res < 0){
+        ALOGE("Failed to read Complete Scan results\n");
+        return res;
+    }
+
+    close(fd);
+    nativeJFmRx_Callback(jContext,0, FM_RX_CMD_STOP_COMPLETE_SCAN,0);
+
     ALOGD("nativeJFmRx_StopCompleteScan(): Exit");
-     return FM_PENDING;
+    return FM_PENDING;
 }
 
 static int nativeJFmRx_IsValidChannel(JNIEnv *env, jobject obj, jlong jContextValue)
@@ -1219,6 +1382,90 @@ static int nativeJFmRx_GetFwVersion(JNIEnv *env, jobject obj, jlong jContextValu
 
 extern "C"
 {
+
+void nativeJFmRx_CompleteScan_Callback(int status,
+            unsigned int * station_data, int channel_count)
+{
+    JNIEnv* env = NULL;
+    bool attachedThread = false;
+    int jRet ;
+    jintArray jChannelsData = NULL;
+
+    ALOGD("nativeJFmRx_CompleteScan_Callback: Entering");
+
+   /* Check whether the current thread is attached to a virtual machine instance,
+   if no only then try to attach to the current thread. */
+    jRet = g_jVM->GetEnv((void **)&env,JNI_VERSION_1_4);
+
+    if(jRet < 0)
+    {
+        V4L2_JBTL_LOGD("failed to get JNI env,assuming native thread");
+        jRet = g_jVM->AttachCurrentThread((&env), NULL);
+
+        if(jRet != JNI_OK)
+        {
+            ALOGE("failed to atatch to current thread %d",jRet);
+            return ;
+        }
+
+        attachedThread = true;
+    }
+
+    if(env == NULL) {
+        ALOGI("%s: Entered, env is null", __func__);
+    } else {
+        ALOGD("%s: jEnv %p", __func__, (void *)env);
+    }
+
+    jChannelsData = env->NewIntArray(channel_count);
+    if (jChannelsData == NULL) {
+        ALOGE("%s: Failed converting elements", __func__);
+        goto CLEANUP;
+    }
+
+    env->SetIntArrayRegion(jChannelsData, 0, channel_count,(jint*) station_data);
+
+    if (env->ExceptionOccurred()) {
+        ALOGE("%s: Calling nativeCb_fmRxRadioText failed", __func__);
+        goto CLEANUP;
+    }
+
+    env->CallStaticVoidMethod(_sJClass,
+            _sMethodId_nativeCb_fmRxCompleteScanDone, (jlong)jContext,
+            (jint)status,
+            (jint)channel_count,
+            jChannelsData);
+
+    if (env->ExceptionOccurred()) {
+            ALOGE("nativeJFmRx_CompleteScan_Callback:  ExceptionOccurred");
+            goto CLEANUP;
+        }
+
+    if(jChannelsData != NULL)
+        env->DeleteLocalRef(jChannelsData);
+
+    if(attachedThread == true)
+        g_jVM->DetachCurrentThread();
+
+    return;
+
+CLEANUP:
+    ALOGE("nativeJFmRx_RadioText_Callback: Exiting due to failure");
+
+    if(jChannelsData != NULL)
+        env->DeleteLocalRef(jChannelsData);
+
+    if (env->ExceptionOccurred())
+    {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+    }
+
+    if(attachedThread == true)
+        g_jVM->DetachCurrentThread();
+
+    return;
+}
 
 void nativeJFmRx_RadioText_Callback(int status, bool resetDisplay,
             unsigned char * msg, int len, int startIndex,
@@ -1646,6 +1893,13 @@ if no only then try to attach to the current thread. */
                                           (jlong)value);
                 break;
 
+            case FM_RX_CMD_SET_WRAP_SEEK_MODE:
+                env->CallStaticVoidMethod(_sJClass,_sMethodId_nativeCb_fmRxCmdSetWrapSeekMode,(jlong)context,
+                                          (jint)status,
+                                          (jint)command,
+                                          (jlong)value);
+                break;
+
             case FM_RX_CMD_GET_RDS_AF_SWITCH_MODE:
                 env->CallStaticVoidMethod(_sJClass,_sMethodId_nativeCb_fmRxCmdGetRdsAfSwitchMode,(jlong)context,
                                           (jint)status,
@@ -1654,12 +1908,10 @@ if no only then try to attach to the current thread. */
                 break;
 
             case FM_RX_CMD_ENABLE_AUDIO:
-        V4L2_JBTL_LOGD("nativeJFmRx_Callback: at FM_RX_CMD_ENABLE_AUDIO step 1");
                 env->CallStaticVoidMethod(_sJClass,_sMethodId_nativeCb_fmRxCmdEnableAudio,(jlong)context,
                                           (jint)status,
                                           (jint)command,
                                           (jlong)value);
-        V4L2_JBTL_LOGD("nativeJFmRx_Callback: at FM_RX_CMD_ENABLE_AUDIO step 2");
                 break;
 
             case FM_RX_CMD_DISABLE_AUDIO:
@@ -2081,6 +2333,10 @@ void nativeJFmRx_ClassInitNative(JNIEnv* env, jclass clazz){
             "(JIIJ)V");
     VERIFY_METHOD_ID(_sMethodId_nativeCb_fmRxCmdSetRdsAfSwitchMode);
 
+    _sMethodId_nativeCb_fmRxCmdSetWrapSeekMode = env->GetStaticMethodID(clazz,
+            "nativeCb_fmRxCmdSetWrapSeekMode",
+            "(JIIJ)V");
+    VERIFY_METHOD_ID(_sMethodId_nativeCb_fmRxCmdSetWrapSeekMode);
 
     _sMethodId_nativeCb_fmRxCmdGetRdsAfSwitchMode = env->GetStaticMethodID(clazz,
             "nativeCb_fmRxCmdGetRdsAfSwitchMode",
@@ -2104,16 +2360,10 @@ void nativeJFmRx_ClassInitNative(JNIEnv* env, jclass clazz){
             "(JIIJ)V");
     VERIFY_METHOD_ID(_sMethodId_nativeCb_fmRxCmdChangeDigitalAudioConfiguration);
 
-    /* Complete scan in V4l2 FM driver is not implemented yet
-    Commented the FM RX Completescan functionality start*/
-
-    /*_sMethodId_nativeCb_fmRxCompleteScanDone  = env->GetStaticMethodID(clazz,
+    _sMethodId_nativeCb_fmRxCompleteScanDone  = env->GetStaticMethodID(clazz,
             "nativeCb_fmRxCompleteScanDone",
             "(JII[I)V");
-    VERIFY_METHOD_ID(_sMethodId_nativeCb_fmRxCompleteScanDone);*/
-
-    /*Commented the FM RX Completescan functionality end*/
-
+    VERIFY_METHOD_ID(_sMethodId_nativeCb_fmRxCompleteScanDone);
 
     _sMethodId_nativeCb_fmRxCmdGetFwVersion = env->GetStaticMethodID(clazz,
             "nativeCb_fmRxCmdGetFwVersion",
@@ -2170,6 +2420,7 @@ static JNINativeMethod JFmRxNative_sMethods[] = {
     {"nativeJFmRx_EnableAudioRouting","(J)I", (void*)nativeJFmRx_EnableAudioRouting},
     {"nativeJFmRx_DisableAudioRouting","(J)I", (void*)nativeJFmRx_DisableAudioRouting},
     {"nativeJFmRx_SetRdsAfSwitchMode","(JI)I", (void*)nativeJFmRx_SetRdsAfSwitchMode},
+    {"nativeJFmRx_SetWrapSeekMode","(JI)I", (void*)nativeJFmRx_SetWrapSeekMode},
     {"nativeJFmRx_GetRdsAfSwitchMode","(J)I", (void*)nativeJFmRx_GetRdsAfSwitchMode},
     {"nativeJFmRx_ChangeAudioTarget","(JII)I",(void*)nativeJFmRx_ChangeAudioTarget},
     {"nativeJFmRx_ChangeDigitalTargetConfiguration","(JI)I",(void*)nativeJFmRx_ChangeDigitalTargetConfiguration},

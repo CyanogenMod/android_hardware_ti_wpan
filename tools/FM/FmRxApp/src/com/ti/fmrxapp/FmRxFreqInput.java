@@ -61,13 +61,21 @@ public class FmRxFreqInput extends Activity implements OnKeyListener,
         btnOk.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
         mBandRange = (TextView) findViewById(R.id.freqRange);
-        if (FmRxApp.sBand == FM_BAND_EUROPE_US) {
-            mBandRange.setText(getText(R.string.freqRangeEurope));
-        } else {
-            mBandRange.setText(getText(R.string.freqRangeJapan));
 
+        switch(FmRxApp.sBand) {
+            case FM_BAND_EUROPE_US:
+                mBandRange.setText(getText(R.string.freqRangeEurope));
+                break;
+            case FM_BAND_JAPAN:
+                mBandRange.setText(getText(R.string.freqRangeJapan));
+                break;
+            case FM_BAND_RUSSIAN:
+                mBandRange.setText(getText(R.string.freqRangeRussian));
+                break;
+            case FM_BAND_WEATHER:
+                mBandRange.setText(getText(R.string.freqRangeWeather));
+                break;
         }
-
     }
 
     private void writeFrequency() {
@@ -132,13 +140,43 @@ public class FmRxFreqInput extends Activity implements OnKeyListener,
     }
 
     static float BaseFreq() {
-        return FmRxApp.sBand == FM_BAND_JAPAN ? APP_FM_FIRST_FREQ_JAPAN_KHZ
-                : APP_FM_FIRST_FREQ_US_EUROPE_KHZ;
+        float freq = 0;
+
+        switch(FmRxApp.sBand) {
+            case FM_BAND_JAPAN:
+                freq = APP_FM_FIRST_FREQ_JAPAN_KHZ;
+                break;
+            case FM_BAND_EUROPE_US:
+                freq = APP_FM_FIRST_FREQ_US_EUROPE_KHZ;
+                break;
+            case FM_BAND_RUSSIAN:
+                freq = APP_FM_FIRST_FREQ_RUSSIAN_KHZ;
+                break;
+            case FM_BAND_WEATHER:
+                freq = APP_FM_FIRST_FREQ_WEATHER_KHZ;
+                break;
+            }
+            return freq;
     }
 
     static float LastFreq() {
-        return FmRxApp.sBand == FM_BAND_JAPAN ? APP_FM_LAST_FREQ_JAPAN_KHZ
-                : APP_FM_LAST_FREQ_US_EUROPE_KHZ;
+        float freq = 0;
+
+        switch(FmRxApp.sBand) {
+            case FM_BAND_JAPAN:
+                freq = APP_FM_LAST_FREQ_JAPAN_KHZ;
+                break;
+            case FM_BAND_EUROPE_US:
+                freq = APP_FM_LAST_FREQ_US_EUROPE_KHZ;
+                break;
+            case FM_BAND_RUSSIAN:
+                freq = APP_FM_LAST_FREQ_RUSSIAN_KHZ;
+                break;
+            case FM_BAND_WEATHER:
+                freq = APP_FM_LAST_FREQ_WEATHER_KHZ;
+                break;
+        }
+        return freq;
     }
 
     // Update the Frequency label with the given value

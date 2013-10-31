@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:id="@+id/ParentLayout" android:orientation="vertical"
-	android:background="@drawable/wallpaper7">
+	android:background="@drawable/wallpaper8">
 	<ScrollView android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/scrollview1"
 		android:layout_weight="1">
@@ -26,11 +26,6 @@
 			<LinearLayout android:id="@+id/widget233"
 				android:layout_below="@+id/widget224" android:layout_width="fill_parent"
 				android:layout_alignParentLeft="false" android:layout_height="100dip">
-				<TextView android:id="@+id/lblFmApp" android:layout_width="wrap_content"
-					android:text="@string/fmapp" android:textSize="24sp"
-					android:textStyle="bold" android:layout_height="50dip"
-					android:layout_marginTop="20dip" android:paddingLeft="50dip">
-				</TextView>
 				<TextView android:id="@+id/txtplatform"
 					android:layout_width="wrap_content" android:text="@string/txtplatform"
 					android:paddingLeft="10dip" android:textSize="24sp"

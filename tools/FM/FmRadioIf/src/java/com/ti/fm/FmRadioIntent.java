@@ -67,6 +67,8 @@ public interface FmRadioIntent {
 
     public static final String GET_MUTE_MODE = "fm.rx.intent.GET_MUTE_MODE";
 
+    public static final String GET_COMP_SCAN = "fm.rx.intent.GET_COMP_SCAN";
+
     public static final String GET_RF_MUTE_MODE = "fm.rx.intent.GET_RF_MUTE_MODE";
 
     public static final String GET_RSSI_THRESHHOLD = "fm.rx.intent.GET_RSSI_THRESHHOLD";
@@ -154,6 +156,9 @@ public interface FmRadioIntent {
     public static final String SET_RDS_AF_ACTION = "fm.rx.intent.action.SET_RDS_AF_ACTION";
 
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String SET_WRAP_SEEK_ACTION = "fm.rx.intent.action.SET_WRAP_SEEK_ACTION";
+
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SET_RDS_SYSTEM_ACTION = "fm.rx.intent.action.SET_RDS_SYSTEM_ACTION";
 
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -182,6 +187,10 @@ public interface FmRadioIntent {
 
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String GET_MUTE_MODE_ACTION = "fm.rx.intent.action.GET_MUTE_MODE_ACTION";
+
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String GET_COMP_SCAN_ACTION = "fm.rx.intent.action.GET_COMP_SCAN_ACTION";
+
 
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String GET_RF_MUTE_MODE_ACTION = "fm.rx.intent.action.GET_RF_MUTE_MODE_ACTION";

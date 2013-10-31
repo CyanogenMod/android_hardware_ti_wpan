@@ -1281,6 +1281,22 @@ public class FmRadio {
        return false;
     }
 
+    public boolean rxSetWrapSeekMode_nb(int mode) {
+          Log.d(TAG, "FmRadio:rxSetWrapSeekMode_nb");
+       if (mService != null) {
+          try {
+             return mService.rxSetWrapSeekMode_nb(mode);
+          } catch (RemoteException e) {
+             Log.e(TAG, e.toString());
+          }
+       } else {
+          Log.w(TAG, "Proxy not attached to service");
+          if (DBG)
+             Log.d(TAG, Log.getStackTraceString(new Throwable()));
+       }
+       return false;
+    }
+
     public boolean rxSetRdsAfSwitchMode_nb(int mode) {
        if (DBG)
           Log.d(TAG, "FmRadio:rxSetRdsAfSwitchMode_nb");

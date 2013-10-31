@@ -35,6 +35,7 @@ extern "C" {
 #define FM_BAND_SYSFS_ENTRY    "/sys/class/video4linux/radio0/fmrx_band"
 #define FM_RDS_AF_SYSFS_ENTRY    "/sys/class/video4linux/radio0/fmrx_rds_af"
 #define FM_RSSI_LVL_SYSFS_ENTRY    "/sys/class/video4linux/radio0/fmrx_rssi_lvl"
+#define FMRX_COMP_SCAN_SYSFS_ENTRY    "/sys/class/video4linux/radio0/fmrx_comp_scan"
 
 #define CTL_INDEX_0                0
 
@@ -46,6 +47,8 @@ extern "C" {
 #define FM_BAND_SWITCH_CTL_NAME    "Region Switch"
 #define FM_BAND_EUROPE_US          0
 #define FM_BAND_JAPAN              1
+#define FM_BAND_RUSSIAN            2
+#define FM_BAND_WEATHER            3
 
 
 #define FM_RF_DEPENDENT_MUTE_CTL_NAME     "RF Dependent Mute"
@@ -145,8 +148,9 @@ typedef FMC_UINT FmRxCmdType;
 #define FM_RX_CMD_COMPLETE_SCAN                            	((FmRxCmdType)41)	/*Perfrom Complete Scan on the selected Band*/
 #define FM_RX_CMD_COMPLETE_SCAN_PROGRESS                            	((FmRxCmdType)42)
 #define FM_RX_CMD_STOP_COMPLETE_SCAN                            	((FmRxCmdType)43)
-#define FM_RX_LAST_API_CMD						(FM_RX_CMD_STOP_COMPLETE_SCAN)
-#define FM_RX_CMD_NONE					0xFFFFFFFF
+#define FM_RX_CMD_SET_WRAP_SEEK_MODE                    ((FmRxCmdType)44)	/* Set Wrap Seek Mode command */
+#define FM_RX_LAST_API_CMD                              (FM_RX_CMD_SET_WRAP_SEEK_MODE)
+#define FM_RX_CMD_NONE                                  0xFFFFFFFF
 
 
 namespace android {

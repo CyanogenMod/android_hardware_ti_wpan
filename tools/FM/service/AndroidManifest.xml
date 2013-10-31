@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.ti.server"
+      android:sharedUserId="android.uid.fmradio"
+      android:sharedUserLabel="@string/FmradioUserLabel"
       android:versionCode="1"
       android:versionName="1.0.0">
 
@@ -36,11 +38,6 @@
                 <action android:name="com.ti.server.FmService" />
             </intent-filter>
         </service>
-        <receiver android:name=".BootReceiver">
-            <intent-filter>
-                <action android:name ="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
     </application>
     <uses-sdk android:minSdkVersion="4" />
 </manifest>

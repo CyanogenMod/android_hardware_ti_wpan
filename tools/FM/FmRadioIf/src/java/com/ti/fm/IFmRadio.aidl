@@ -81,6 +81,7 @@ interface IFmRadio {
     long rxGetRdsGroupMask();
     boolean rxGetRdsGroupMask_nb();
     boolean rxSetRdsAfSwitchMode(int mode);
+    boolean rxSetWrapSeekMode_nb(int mode);
     boolean rxSetRdsAfSwitchMode_nb(int mode);
     int rxGetRdsAfSwitchMode();
     boolean rxGetRdsAfSwitchMode_nb();

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:id="@+id/ParentLayout" android:orientation="vertical"
-	android:background="@drawable/wallpaper7">
+	android:background="@drawable/wallpaper8">
 	<ScrollView android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/scrollview1"
 		android:layout_weight="1">
@@ -14,6 +14,10 @@
 				android:layout_width="fill_parent" android:layout_height="120dip">
 
                                 <ImageView android:id="@+id/imgMute"
+					android:layout_gravity="center" android:layout_height="wrap_content"
+					android:layout_width="fill_parent" android:layout_weight="1">
+				</ImageView>
+                                <ImageView android:id="@+id/imgCompScan"
 					android:layout_gravity="center" android:layout_height="wrap_content"
 					android:layout_width="fill_parent" android:layout_weight="1">
 				</ImageView>
@@ -32,7 +36,7 @@
 			<LinearLayout android:id="@+id/widget35"
 				android:layout_below="@+id/widget30" android:layout_alignParentLeft="true"
 				android:layout_width="fill_parent" android:orientation="vertical"
-				android:layout_height="70dip">
+				android:layout_height="100dip">
 				<TextView android:id="@+id/txtRadioText"
 					android:scrollHorizontally="false" android:lines="1" android:text="@string/radioTxt"
 					android:textStyle="bold" android:textSize="20sp"
@@ -62,11 +66,11 @@
 
 			<LinearLayout android:layout_width="fill_parent"
 				android:layout_height="100dip"
-				android:id="@+id/widget67" android:layout_marginLeft="25dip">
+				android:id="@+id/widget67" android:layout_marginLeft="5dip">
 
 				<TableLayout android:id="@+id/TableLayout01"
 					android:layout_width="wrap_content" android:layout_weight="1"
-					android:layout_height="wrap_content"  android:paddingLeft="40dip">
+					android:layout_height="wrap_content"  android:paddingLeft="20dip">
 					<TableRow android:layout_margin="1dip">
 						<ImageButton android:id="@+id/imgseekdown"
 							android:layout_height="80dip" android:layout_width="wrap_content"
@@ -118,17 +122,17 @@
 				android:layout_width="fill_parent" android:paddingTop="40dip"
 				android:layout_height="100dip">
 				<Button android:id="@+id/station1" android:layout_height="50dip"
-					android:text="@string/station1" android:textSize="30sp"
+					android:text="@string/station1" android:textSize="20sp"
 					android:background="@drawable/btn_bgd" android:clickable="true" android:layout_width="fill_parent"
                                         android:layout_weight="1" android:layout_marginLeft="20dip" android:layout_marginRight="20dip">
 				</Button>
 				<Button android:id="@+id/station2" android:layout_marginLeft="20dip"
 					android:layout_height="50dip" android:text="@string/station2"
-					android:textSize="30sp" android:background="@drawable/btn_bgd" android:clickable="true" android:layout_width="fill_parent" android:layout_weight="1" android:layout_marginRight="20dip">
+					android:textSize="20sp" android:background="@drawable/btn_bgd" android:clickable="true" android:layout_width="fill_parent" android:layout_weight="1" android:layout_marginRight="20dip">
 				</Button>
 				<Button android:id="@+id/station3" android:layout_marginLeft="20dip"
 					android:layout_height="50dip" android:text="@string/station3"
-					android:editable="true" android:textSize="30sp"
+					android:editable="true" android:textSize="20sp"
 					android:background="@drawable/btn_bgd"
 					android:clickable="true" android:layout_width="fill_parent" android:layout_weight="1" android:layout_marginRight="20dip">
 				</Button>
@@ -138,19 +142,19 @@
 				android:layout_width="fill_parent" android:paddingTop="20dip"
 				android:layout_height="100dip">
 				<Button android:id="@+id/station4" android:layout_height="50dip"
-					android:text="@string/station4" android:textSize="30sp"
+					android:text="@string/station4" android:textSize="20sp"
 					android:layout_marginLeft="20dip"
 					android:layout_gravity="center" android:background="@drawable/btn_bgd"
 					android:clickable="true" android:layout_width="fill_parent" android:layout_weight="1" android:layout_marginRight="20dip">
 				</Button>
 				<Button android:id="@+id/station5" android:layout_height="50dip"
 					android:layout_marginLeft="20dip" android:text="@string/station5"
-					android:textSize="30sp" android:layout_gravity="center" android:background="@drawable/btn_bgd"
+					android:textSize="20sp" android:layout_gravity="center" android:background="@drawable/btn_bgd"
 					android:clickable="true" android:layout_marginRight="20dip" android:layout_width="fill_parent" android:layout_weight="1">
 				</Button>
 				<Button android:id="@+id/station6" android:layout_height="50dip"
 					android:layout_marginLeft="20dip" android:text="@string/station6"
-					android:textSize="30sp" android:layout_gravity="center" android:background="@drawable/btn_bgd"
+					android:textSize="20sp" android:layout_gravity="center" android:background="@drawable/btn_bgd"
 					android:clickable="true" android:layout_width="fill_parent" android:layout_weight="1" android:layout_marginRight="20dip">
 				</Button>
 			</LinearLayout>

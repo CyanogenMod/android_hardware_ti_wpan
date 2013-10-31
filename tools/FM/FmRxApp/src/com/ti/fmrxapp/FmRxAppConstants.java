@@ -59,6 +59,8 @@ public interface FmRxAppConstants {
     public static final int EVENT_GET_RDS_GROUPMASK = 36;
     public static final int EVENT_GET_FREQUENCY = 37;
     public static final int EVENT_COMPLETE_SCAN_PROGRESS = 38;
+    public static final int EVENT_SET_WRAP_SEEK = 39;
+    public static final int EVENT_GET_COMP_SCAN = 40;
 
 
     /* Volume range */
@@ -71,12 +73,15 @@ public interface FmRxAppConstants {
     public static final int DEF_VOLUME = 10;
     public static final float DEFAULT_FREQ_EUROPE = (float) 87500 / 1000;
     public static final float DEFAULT_FREQ_JAPAN = (float) 76000 / 1000;
+    public static final float DEFAULT_FREQ_RUSSIAN = (float) 65800 / 1000;
+    public static final float DEFAULT_FREQ_WEATHER = (float) 162400 / 1000;
     public static final int DEFAULT_BAND = 0; // EuropeUS
     public static final int DEFAULT_MODE = 0; // Stereo
     public static final boolean DEFAULT_RDS = false;
     public static final int DEFAULT_DEEMP = 0;
     public static final int DEFAULT_RDS_SYSTEM = 0;
     public static final boolean DEFAULT_RDS_AF = false;
+    public static final boolean DEFAULT_WRAP_SEEK = false;
     public static final int DEFAULT_RSSI = 7;
     public static final int DEFAULT_CHANNELSPACE = 2;
 
@@ -85,6 +90,7 @@ public interface FmRxAppConstants {
     public static final int ACTIVITY_TUNE = 1;
     public static final int ACTIVITY_CONFIG = 2;
     public static final int ACTIVITY_PRESET = 3;
+    public static final int ACTIVITY_STOPCOMPSCAN = 4;
 
     public static final String FREQ_VALUE = "FREQUENCY";
 
@@ -113,6 +119,7 @@ public interface FmRxAppConstants {
     public static final String RDSSYSTEM = "RDSSYSTEM";
     public static final String DEEMP = "DEEMP";
     public static final String RDSAF = "RDSAF";
+    public static final String WRAPSEEK = "WRAPSEEK";
     public static final String RSSI = "RSSI";
     public static final String RSSI_STRING = "RSSI_STRING";
     public static final String DEF_RSSI_STRING = "7";
@@ -151,4 +158,13 @@ public static final float APP_FM_FIRST_FREQ_JAPAN_KHZ = (float)76.0;
 
 public static final float APP_FM_LAST_FREQ_JAPAN_KHZ = (float)90.0;
 
+/* Russian band limits */
+public static final float APP_FM_FIRST_FREQ_RUSSIAN_KHZ = (float)65.8;
+
+public static final float APP_FM_LAST_FREQ_RUSSIAN_KHZ = (float)74.0;
+
+/* Weather band limits */
+public static final float APP_FM_FIRST_FREQ_WEATHER_KHZ = (float)162.4;
+
+public static final float APP_FM_LAST_FREQ_WEATHER_KHZ = (float)162.55;
 }

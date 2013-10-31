@@ -39,6 +39,10 @@ public interface IFmConstants {
 
     public static final int FM_BAND_JAPAN = 1;
 
+    public static final int FM_BAND_RUSSIAN = 2;
+
+    public static final int FM_BAND_WEATHER = 3;
+
     /* Europe / US band limits */
     public static final int FM_FIRST_FREQ_US_EUROPE_KHZ = 87500;
 
@@ -48,6 +52,16 @@ public interface IFmConstants {
     public static final int FM_FIRST_FREQ_JAPAN_KHZ = 76000;
 
     public static final int FM_LAST_FREQ_JAPAN_KHZ = 90000;
+
+    /* Russian band limits */
+    public static final int FM_FIRST_FREQ_RUSSIAN_KHZ = 65800;
+
+    public static final int FM_LAST_FREQ_RUSSIAN_KHZ = 74000;
+
+    /* Eeather band limits */
+    public static final int FM_FIRST_FREQ_WEATHER_KHZ = 162400;
+
+    public static final int FM_LAST_FREQ_WEATHER_KHZ = 162550;
 
     public static final int DEF_VOL = 1;
 
@@ -72,6 +86,10 @@ public interface IFmConstants {
     public static final int FM_MUTE = 0;
 
     public static final int FM_UNMUTE = 1;
+
+    public static final int FM_START_COMP_SCAN = 1;
+
+    public static final int FM_STOP_COMP_SCAN = 0;
 
     public static final int FM_ATT = 2;
 

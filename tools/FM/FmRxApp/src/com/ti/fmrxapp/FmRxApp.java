@@ -112,13 +112,13 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      * Widgets
      ********************************************/
 
-    private ImageView imgFmPower, imgFmMode, imgFmVolume, imgFmAudiopath;
+    private ImageView imgFmPower, imgFmMode, imgFmVolume, imgFmCompScan, imgFmAudiopath;
     private ImageButton imgFmSeekUp, imgFmSeekDown;
     private TextView txtStatusMsg, txtRadioText;
     private TextView txtPsText;
-    static TextView txtStationName;
-    private static Button btnStation1, btnStation2, btnStation3;
-    private static Button btnStation4, btnStation5, btnStation6;
+    private TextView txtStationName;
+    private Button btnStation1, btnStation2, btnStation3;
+    private Button btnStation4, btnStation5, btnStation6;
     private ProgressDialog pd = null, configPd;
 
     /********************************************
@@ -138,6 +138,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private int mToggleMode = 0; // To toggle between the mono/stereo
     private int mToggleAudio = 1; // To toggle between the speaker/headset
     private boolean mToggleMute = false; // To toggle between the mute/unmute
+    private boolean mToggleCompScan = false;
+    private boolean mCompScanStat = false;
+    private boolean mStoppedRds = false;
 
     private boolean mRdsState = false;
     /* Default values */
@@ -145,6 +148,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private int mMode = DEFAULT_MODE;
     private boolean mRds = DEFAULT_RDS;
     private boolean mRdsAf = DEFAULT_RDS_AF;
+    private boolean mWrapSeek = DEFAULT_WRAP_SEEK;
     private int mRdsSystem = INITIAL_VAL;
     private int mDeEmpFilter = INITIAL_VAL;
     private int mRssi = INITIAL_RSSI;
@@ -180,8 +184,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     private NotificationManager mNotificationManager;
 
-    static final String FM_INTERRUPTED_KEY = "fm_interrupted";
-    static final String FM_STATE_KEY = "fm_state";
+    final String FM_INTERRUPTED_KEY = "fm_interrupted";
+    final String FM_STATE_KEY = "fm_state";
     /* Flag to know whether FM App was interrupted due to orientation change */
     boolean mFmInterrupted = false;
 
@@ -197,9 +201,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public static FmRadio sFmRadio;
 
     /** Arraylist of stations */
-    public static ArrayList<HashMap<String, String>> stations = new ArrayList<HashMap<String, String>>(
+    public ArrayList<HashMap<String, String>> stations = new ArrayList<HashMap<String, String>>(
             6);
-    public static TextView txtFmRxTunedFreq;
+    public TextView txtFmRxTunedFreq;
     private OrientationListener mOrientationListener;
 
     Context mContext;
@@ -248,6 +252,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         intentFilter.addAction(FmRadioIntent.ENABLE_RDS_ACTION);
         intentFilter.addAction(FmRadioIntent.DISABLE_RDS_ACTION);
         intentFilter.addAction(FmRadioIntent.SET_RDS_AF_ACTION);
+        intentFilter.addAction(FmRadioIntent.SET_WRAP_SEEK_ACTION);
         intentFilter.addAction(FmRadioIntent.SET_RDS_SYSTEM_ACTION);
         intentFilter.addAction(FmRadioIntent.SET_DEEMP_FILTER_ACTION);
         intentFilter.addAction(FmRadioIntent.SET_RSSI_THRESHHOLD_ACTION);
@@ -260,6 +265,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         intentFilter.addAction(FmRadioIntent.GET_BAND_ACTION);
         intentFilter.addAction(FmRadioIntent.GET_MONO_STEREO_MODE_ACTION);
         intentFilter.addAction(FmRadioIntent.GET_MUTE_MODE_ACTION);
+        intentFilter.addAction(FmRadioIntent.GET_COMP_SCAN_ACTION);
         intentFilter.addAction(FmRadioIntent.GET_RF_MUTE_MODE_ACTION);
         intentFilter.addAction(FmRadioIntent.GET_RSSI_THRESHHOLD_ACTION);
         intentFilter.addAction(FmRadioIntent.GET_DEEMPHASIS_FILTER_ACTION);
@@ -348,7 +354,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
        }
 
     }
-private void startup() {
+    private void startup() {
         //Log.i(TAG, "startup");
 
 
@@ -433,7 +439,7 @@ private void startup() {
      * Set the arraylist with the selected station name and display the name on
      * main screen
      */
-    public static void UpdateRenameStation(int index, String name) {
+    public void UpdateRenameStation(int index, String name) {
         txtStationName.setText(name.toString());
         // Store the name in the selected index in Arraylist
         SetStation(index, "", name);
@@ -444,7 +450,7 @@ private void startup() {
      * Set the arraylist and the buttons with the selected station and make the
      * button enabled so that user can select it to select the stored stations
      */
-    public static void updateSetStation(int index, String freq, String name) {
+    public void updateSetStation(int index, String freq, String name) {
         switch (index) {
         case 0:
             if (freq.equals(""))
@@ -509,7 +515,7 @@ private void startup() {
      * button disabled so that user cannot select it
      */
 
-    public static void updateUnSetStation(int index) {
+    public void updateUnSetStation(int index) {
         switch (index) {
         case 0:
             btnStation1.setEnabled(false);
@@ -543,7 +549,7 @@ private void startup() {
     }
 
     /* Set particular station name or frequency in the stations arraylist */
-    public static void SetStation(Integer index, String freq, String name) {
+    public void SetStation(Integer index, String freq, String name) {
         Log.i(TAG, "SetStation");
         Integer pos = new Integer(index.intValue() + 1);
         try {
@@ -570,7 +576,7 @@ private void startup() {
     }
 
     /* UnSet particular station name and frequency in the stations arraylist */
-    public static void UnSetStation(Integer index, String freq, String name) {
+    public void UnSetStation(Integer index, String freq, String name) {
        Log.i(TAG, "UnSetStation");
        Integer pos = new Integer(index.intValue() + 1);
        try {
@@ -586,7 +592,7 @@ private void startup() {
 
     /* Get particular station from the stations arraylist */
 
-    public static String GetStation(Integer index) {
+    public String GetStation(Integer index) {
         Log.i(TAG, "GetStation");
         Integer pos = new Integer(index.intValue() + 1);
         try {
@@ -643,6 +649,30 @@ private void startup() {
                 setButtonLabels();
                 imgFmPower.setImageResource(R.drawable.poweron);
 
+                /* Setting the default band */
+                if (sdefaultSettingOn == false) {
+                     /* Set the default band */
+                        if (MAKE_FM_APIS_BLOCKING == true) {
+                                 // Code for blocking call
+                               mStatus = sFmRadio.rxSetBand(sBand);
+                                if (mStatus == false) {
+                            showAlert(FmRxApp.this, "FmRadio","Not able to setband!!!!");
+                           } else {
+                                lastTunedFrequency = (float) lastTunedFrequency ;
+                                 mStatus = sFmRadio.rxTune_nb((int)(lastTunedFrequency.floatValue()* 1000));
+                            if (mStatus == false) {
+                                   showAlert(FmRxApp.this, "FmRadio","Not able to tune!!!!");
+                            }
+                        }
+
+                   } else {
+                       // Code for non blocking call
+                      mStatus = sFmRadio.rxSetBand_nb(sBand);
+                      if (mStatus == false) {
+                           showAlert(FmRxApp.this, "FmRadio","Not able to setband!!!!");
+                          }
+                   }
+                }
                 break;
 
              /*
@@ -742,36 +772,7 @@ private void startup() {
                  * idle, so that user can set other volume.
                  */
                 mVolState = VOL_REQ_STATE_IDLE;
-                /*
-                 * Setting the default band after the volume change when FM app
-                 * is started for the first time
-                 */
-                if (sdefaultSettingOn == false) {
-                     /* Set the default band */
-                        if (MAKE_FM_APIS_BLOCKING == true) {
-                                 // Code for blocking call
-                               mStatus = sFmRadio.rxSetBand(sBand);
-                                if (mStatus == false) {
-                            showAlert(getParent(), "FmRadio","Not able to setband!!!!");
-                           } else {
-                                lastTunedFrequency = (float) lastTunedFrequency ;
-                                 mStatus = sFmRadio.rxTune_nb((int)(lastTunedFrequency.floatValue()* 1000));
-                            if (mStatus == false) {
-                                   showAlert(getParent(), "FmRadio","Not able to tune!!!!");
-                            }
-                        }
 
-                   } else {
-                       // Code for non blocking call
-                      mStatus = sFmRadio.rxSetBand_nb(sBand);
-                      if (mStatus == false) {
-                           showAlert(getParent(), "FmRadio","Not able to setband!!!!");
-                          }
-                   }
-
-
-
-                }
                 break;
 
                 case EVENT_COMPLETE_SCAN_PROGRESS:
@@ -808,7 +809,7 @@ private void startup() {
 /*
                 mStatus = sFmRadio.rxEnableAudioRouting();
                     if (mStatus == false) {
-                        showAlert(getParent(), "FmRadio",
+                        showAlert(getParent(), "FmRadio",          //should be fixed by "FmRxApp.this" instead of "getParent()"
                                 "Not able to enable audio!!!!");
                     }
 */
@@ -867,7 +868,7 @@ private void startup() {
             /* tune to default frequency after the band change callback . */
 
             case EVENT_BAND_CHANGE:
-                Log.i(TAG, "enter handleMessage ----EVENT_BAND_CHANGE");
+                Log.i(TAG, "enter handleMessage ----EVENT_BAND_CHANGE "+sBand);
                 /*
                  * Tune to the last stored frequency at the
                  * enable/re-enable,else tune to the default frequency when band
@@ -876,15 +877,25 @@ private void startup() {
 
                 if (sdefaultSettingOn == true) {
                     /* Set the default frequency */
-                    if (sBand == FM_BAND_EUROPE_US)
-                        lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
-                    else
-                        lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
+                    switch(sBand) {
+                            case FM_BAND_EUROPE_US:
+                                lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
+                                break;
+                            case FM_BAND_JAPAN:
+                                lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
+                                break;
+                            case FM_BAND_RUSSIAN:
+                                lastTunedFrequency = (float) DEFAULT_FREQ_RUSSIAN;
+                                break;
+                            case FM_BAND_WEATHER:
+                                lastTunedFrequency = (float) DEFAULT_FREQ_WEATHER;
+                                break;
+                    }
                 }
 
                 mStatus = sFmRadio.rxTune_nb((int)(lastTunedFrequency.floatValue()*1000));
                 if (mStatus == false) {
-                    showAlert(getParent(), "FmRadio", "Not able to tune!!!!");
+                    showAlert(FmRxApp.this, "FmRadio", "Not able to tune!!!!");
                 }
 
                 break;
@@ -893,6 +904,10 @@ private void startup() {
 
             case EVENT_ENABLE_RDS:
                 Log.i(TAG, "enter handleMessage ----EVENT_ENABLE_RDS");
+                break;
+
+            case EVENT_SET_WRAP_SEEK:
+                Log.i(TAG, "enter handleMessage ----EVENT_SET_WRAP_SEEK");
                 break;
 
             /* Set RSSI after SET_RDS_AF callback */
@@ -948,6 +963,7 @@ private void startup() {
 
             case EVENT_COMPLETE_SCAN_STOP:
                 Log.i(TAG, "enter handleMessage ----EVENT_COMPLETE_SCAN_STOP");
+                    imgFmCompScan.setImageResource(R.drawable.fm_start_comp_scan);
                 break;
 
             case EVENT_COMPLETE_SCAN_DONE:
@@ -955,11 +971,25 @@ private void startup() {
 
                 int[] channelList = (int[]) msg.obj;
                 int noOfChannels = (int) msg.arg2;
+                float station;
 
-                Log.i(TAG, "noOfChannels" + noOfChannels);
+                Log.i(TAG, "noOfChannels " + noOfChannels);
 
-                for (int i = 0; i < noOfChannels; i++)
-                    Log.i(TAG, "channelList" + channelList[i]);
+                for (int i = 0; i < noOfChannels; i++) {
+                    Log.i(TAG, "channelList " + channelList[i]);
+                    if (i <= 5) {
+                        /* There are only 6 presets, neglect if found more */
+                        station = (float) channelList[i] / 1000;
+                        Log.i(TAG, "channelList (float)" + station);
+
+                        updateSetStation(i, String.valueOf(station), String.valueOf(station));
+                    }
+                }
+
+                mToggleCompScan = false;
+                mCompScanStat = true;
+
+                finishActivity(ACTIVITY_STOPCOMPSCAN);
 
                 break;
 
@@ -985,6 +1015,15 @@ private void startup() {
                 Long gMode = (Long) msg.obj;
                 Log.i(TAG,"enter handleMessage ----EVENT_GET_MODE");
                 Log.d(TAG, "enter handleMessage ----gMode" + gMode);
+                   break;
+            case EVENT_GET_COMP_SCAN :
+
+                Long gCompScan = (Long) msg.obj;
+
+                if(gCompScan ==(long) FM_START_COMP_SCAN)
+                    imgFmCompScan.setImageResource(R.drawable.fm_start_comp_scan);
+
+                Log.i(TAG,"enter handleMessage ----EVENT_GET_COMP_SCAN");
                    break;
             case EVENT_GET_MUTE_MODE :
 
@@ -1043,11 +1082,12 @@ private void startup() {
 
     /* Display alert dialog */
     public void showAlert(Context context, String title, String msg) {
-
-        new AlertDialog.Builder(context).setTitle(title).setIcon(
-                android.R.drawable.ic_dialog_alert).setMessage(msg)
-                .setNegativeButton(android.R.string.cancel, null).show();
-
+        new AlertDialog.Builder(context)
+                       .setTitle(title)
+                       .setIcon(android.R.drawable.ic_dialog_alert)
+                       .setMessage(msg)
+                       .setNegativeButton(android.R.string.cancel, null)
+                       .show();
     }
 
 
@@ -1075,42 +1115,58 @@ private void startup() {
                     sBand = band;
                     if (sdefaultSettingOn == true) {
                         /* Set the default frequency */
-                        if (sBand == FM_BAND_EUROPE_US)
-                            lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
-                        else
-                            lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
+                        switch(sBand) {
+                            case FM_BAND_EUROPE_US:
+                                lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
+                                break;
+                            case FM_BAND_JAPAN:
+                                lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
+                                break;
+                            case FM_BAND_RUSSIAN:
+                                lastTunedFrequency = (float) DEFAULT_FREQ_RUSSIAN;
+                                break;
+                            case FM_BAND_WEATHER:
+                                lastTunedFrequency = (float) DEFAULT_FREQ_WEATHER;
+                                break;
+                        }
                     }
 
                     lastTunedFrequency = (float) lastTunedFrequency ;
                     mStatus = sFmRadio.rxTune_nb((int)(lastTunedFrequency.floatValue()*1000));
                     if (mStatus == false) {
-                        showAlert(getParent(), "FmRadio", "Not able to tune!!!!");
+                        showAlert(this, "FmRadio", "Not able to tune!!!!");
                     }
 
                 }
 
-            }
-
-            else
-                {
+            } else {
 
                     mStatus = sFmRadio.rxSetBand_nb(band);
-                            if (mStatus == false) {
-                    Log.e(TAG, "setRdsConfig()-- setBand ->Erorr");
-                    showAlert(this, "FmRadio",
-                            "Cannot  setBand to selected Value!!!!");
-                } else {
-                    sBand = band;
-                    if (sdefaultSettingOn == true) {
-                        /* Set the default frequency */
-                        if (sBand == FM_BAND_EUROPE_US)
-                            lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
-                        else
-                            lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
-                    }
 
+                    if (mStatus == false) {
+                        Log.e(TAG, "setRdsConfig()-- setBand ->Erorr");
+                        showAlert(this, "FmRadio",
+                           "Cannot  setBand to selected Value!!!!");
+                    } else {
+                        sBand = band;
+                        if (sdefaultSettingOn == true) {
+                            switch(sBand) {
+                                case FM_BAND_EUROPE_US:
+                                    lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
+                                    break;
+                                case FM_BAND_JAPAN:
+                                    lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
+                                    break;
+                                case FM_BAND_RUSSIAN:
+                                    lastTunedFrequency = (float) DEFAULT_FREQ_RUSSIAN;
+                                    break;
+                                case FM_BAND_WEATHER:
+                                    lastTunedFrequency = (float) DEFAULT_FREQ_WEATHER;
+                                    break;
+                        }
+                    }
                 }
-    }
+            }
 }
 
 
@@ -1244,7 +1300,6 @@ private void startup() {
                     DEFAULT_RDS_AF);
             int rdsAf = 0;
             rdsAf = rdsAfSwitch ? 1 : 0;
-            if (DBG)
             Log.d(TAG, "setRdsAf()--- rdsAfSwitch= " + rdsAf);
             if (mRdsAf != rdsAfSwitch) {
                 // Set RDS-AF if a new choice is made by the user
@@ -1259,6 +1314,20 @@ private void startup() {
                 }
                 mRdsAf = rdsAfSwitch;
             }
+
+    // Set Wrap Seek
+        boolean WrapSeekSwitch = fmConfigPreferences.getBoolean(WRAPSEEK,
+                    DEFAULT_WRAP_SEEK);
+            int WrapSeek = 0;
+            WrapSeek = WrapSeekSwitch ? 1 : 0;
+            Log.d(TAG, "setSwrapSeek()--- WrapSeekSwitch= " + WrapSeek);
+            mStatus = sFmRadio.rxSetWrapSeekMode_nb(WrapSeek);
+            if (mStatus == false) {
+                Log.e(TAG, "setWrapSeek()-- setWrapSeekMode(1) ->Erorr");
+                showAlert(this, "FmRadio", "Cannot set WRAP SEEK Mode ON!!!!");
+            }
+            mRdsAf = WrapSeekSwitch;
+
         // Set Rssi
         int rssiThreshHold = fmConfigPreferences.getInt(RSSI, DEFAULT_RSSI);
         Log.i(TAG, "setRssi()-ENTER --- rssiThreshHold= " + rssiThreshHold);
@@ -1292,6 +1361,7 @@ private void startup() {
             saveObject();
 
        /* Read the stations stored in DB and update the UI */
+       if(mCompScanStat == false) {
        try {
           db.open();
           Cursor c = db.getStation(1);
@@ -1306,22 +1376,38 @@ private void startup() {
        } catch (Exception ex) {
           mIsDbPresent = false;
        }
-
-       if (mIsDbPresent == false) {
-
-          Log.d(TAG, " mIsDbPresent writeobject" + mIsDbPresent);
-          writeObject();
-          mIsDbPresent = true;
-       } else {
-          Log.d(TAG, " mIsDbPresent readobject" + mIsDbPresent);
-          readObject();
        }
 
-       Log.d(TAG, " mIsDbPresent " + mIsDbPresent);
         sBand = fmConfigPreferences.getInt(BAND, DEFAULT_BAND);
-        lastTunedFrequency = fmConfigPreferences.getFloat(FREQUENCY,
-                (sBand == FM_BAND_EUROPE_US ? DEFAULT_FREQ_EUROPE
-                        : DEFAULT_FREQ_JAPAN));
+        switch(sBand) {
+                case FM_BAND_EUROPE_US:
+                    lastTunedFrequency = fmConfigPreferences.getFloat(FREQUENCY, DEFAULT_FREQ_EUROPE);
+                    break;
+                case FM_BAND_JAPAN:
+                    lastTunedFrequency = fmConfigPreferences.getFloat(FREQUENCY, DEFAULT_FREQ_JAPAN);
+                    break;
+                case FM_BAND_RUSSIAN:
+                    lastTunedFrequency = fmConfigPreferences.getFloat(FREQUENCY, DEFAULT_FREQ_RUSSIAN);
+                    break;
+                case FM_BAND_WEATHER:
+                    lastTunedFrequency = fmConfigPreferences.getFloat(FREQUENCY, DEFAULT_FREQ_WEATHER);
+                    break;
+        }
+
+        Log.d(TAG, "sBand = " +sBand);
+        if(mCompScanStat == false) {
+                if (mIsDbPresent == false) {
+
+                        Log.d(TAG, " mIsDbPresent writeobject" + mIsDbPresent);
+                        writeObject();
+                        mIsDbPresent = true;
+                } else {
+                        Log.d(TAG, " mIsDbPresent readobject" + mIsDbPresent);
+                        readObject();
+                }
+        }
+
+       Log.d(TAG, " mIsDbPresent " + mIsDbPresent);
         mMode = fmConfigPreferences.getInt(MODE, DEFAULT_MODE);
         mToggleMute = fmConfigPreferences.getBoolean(MUTE, false);
        mRdsState = fmConfigPreferences.getBoolean(RDS, false);
@@ -1329,7 +1415,6 @@ private void startup() {
        if (DBG)
           Log.d(TAG, " Load default band " + sBand + "default volume" + mVolume + "last fre"
                 + lastTunedFrequency + "mode" + mMode + "mToggleMute" + mToggleMute +"mRdsState"+mRdsState);
-
     }
 
     private void createEmptyList() {
@@ -1467,6 +1552,14 @@ private void startup() {
         }
 
 
+        imgFmCompScan = (ImageView) findViewById(R.id.imgCompScan);
+        imgFmCompScan.setOnClickListener(this);
+
+        if (mToggleCompScan == false) {
+        imgFmCompScan.setImageResource(R.drawable.fm_start_comp_scan);
+        Log.i(TAG, " initControls Complete Scan " +mToggleCompScan);
+        }
+
         imgFmSeekUp = (ImageButton) findViewById(R.id.imgseekup);
         imgFmSeekUp.setOnClickListener(this);
 
@@ -1559,6 +1652,16 @@ private void startup() {
             }
         }
             break;
+
+        case (ACTIVITY_STOPCOMPSCAN):
+                if(mToggleCompScan == false)
+                        break;
+
+                Log.i(TAG, "ACTIVITY_STOPCOMPSCAN");
+                sFmRadio.rxStopCompleteScan_nb();
+
+                txtStatusMsg.setText(R.string.playing);
+                break;
 
         case (ACTIVITY_CONFIG): {
             if (resultCode == Activity.RESULT_OK) {
@@ -1839,6 +1942,7 @@ private void startup() {
                     + sFmRadio.rxStopCompleteScan_nb());
                 }
 
+            txtStatusMsg.setText(R.string.playing);
             return true;
 
         case KeyEvent.KEYCODE_S:
@@ -1863,28 +1967,31 @@ if (MAKE_FM_APIS_BLOCKING == true) {
     }
 
     /* Get the stored frequency from the arraylist and tune to that frequency */
-    void tuneStationFrequency(String text) {
+    boolean tuneStationFrequency(String text) {
         try {
             float iFreq = Float.parseFloat(text);
             if (iFreq != 0) {
-                lastTunedFrequency = (float) iFreq ;
-                if (DBG)
-                Log.d(TAG, "lastTunedFrequency" + lastTunedFrequency);
-                mStatus = sFmRadio.rxTune_nb((int)(lastTunedFrequency.floatValue()*1000));
+                mStatus = sFmRadio.rxTune_nb((int)(iFreq*1000));
                 if (mStatus == false) {
-                    showAlert(getParent(), "FmRadio", "Not able to tune!!!!");
+                    showAlert(this, "FmRadio", "Not able to tune!!!!");
+                    return false;
                 }
+                if (DBG) {
+                    Log.d(TAG, "lastTunedFrequency" + lastTunedFrequency);
+                }
+                lastTunedFrequency = (float) iFreq ;
             } else {
-
                 new AlertDialog.Builder(this).setIcon(
                         android.R.drawable.ic_dialog_alert).setMessage(
                         "Enter valid frequency!!").setNegativeButton(
                         android.R.string.ok, null).show();
-
+                return false;
             }
         } catch (NumberFormatException nfe) {
             Log.e(TAG, "nfe");
+            return false;
         }
+        return true;
     }
 
     public void onClick(View v) {
@@ -1904,7 +2011,7 @@ if (MAKE_FM_APIS_BLOCKING == true) {
 
 //            try{
 //            if (mStatus == false) {
-//                showAlert(getParent(), "FmRadio",
+//                showAlert(getParent(), "FmRadio",          //should be fixed by "this" instead of "getParent()"
 //                        "Not able to disable audio!!!!");
 //            }
 //            }catch (NumberFormatException e) {
@@ -1985,6 +2092,36 @@ if (MAKE_FM_APIS_BLOCKING == true) {
             }
 
             break;
+        case R.id.press:
+            Log.i(TAG, "Testing completescan()");
+            showAlert(this, "FmRadio", "Stoping Complete Scan");
+            break;
+
+        case R.id.imgCompScan:
+            Log.i(TAG, "Starting completescan");
+
+            if(sBand == FM_BAND_WEATHER) {
+                    showAlert(this, "FmRadio", "Complete Scan is not available for Weather Band");
+                    break;
+            }
+
+            /* Start Second intent for complete scan */
+            Intent intent = new Intent();
+            intent.setClass(this,FmRxCompScan.class);
+            startActivityForResult(intent, ACTIVITY_STOPCOMPSCAN);
+
+            txtStationName.setText(null); /* set the station name to null */
+
+            mStatus = sFmRadio.rxCompleteScan_nb();
+            if (mStatus == false) {
+                    showAlert(this, "FmRadio", "Not able to do complete scan!!!!");
+
+            } else {
+                    txtStatusMsg.setText(R.string.scaning);
+
+                    mToggleCompScan = true;
+            }
+            break;
         case R.id.station1:
             mStationIndex = 0;
             updateStationDisplay(mStationIndex);
@@ -2022,9 +2159,9 @@ if (MAKE_FM_APIS_BLOCKING == true) {
     void updateStationDisplay(int index) {
         String tunedFreq = null;
         tunedFreq = GetStation(index);
-        tuneStationFrequency(tunedFreq);
-        txtFmRxTunedFreq.setText(tunedFreq.toString());
-
+        if (tuneStationFrequency(tunedFreq)) {
+            txtFmRxTunedFreq.setText(tunedFreq.toString());
+        }
     }
 
     /* Creates the menu items */
@@ -2074,7 +2211,7 @@ if (MAKE_FM_APIS_BLOCKING == true) {
              */
 //            mStatus = sFmRadio.rxDisableAudioRouting();
 //            if (mStatus == false) {
-//                showAlert(getParent(), "FmRadio",
+//                showAlert(getParent(), "FmRadio",            //should be fixed by "this" instead of "getParent()"
 //                        "Not able to disable audio!!!!");
 //            }
 //            Log.d(TAG, "MENU_EXIT ------------------- 2");
@@ -2328,6 +2465,15 @@ if (MAKE_FM_APIS_BLOCKING == true) {
 
 
 
+                if (fmAction.equals(FmRadioIntent.GET_COMP_SCAN_ACTION)) {
+                    Log.i(TAG, "enter onReceive GET_COMP_SCAN_ACTION " + fmAction);
+
+                    Long gMuteMode = intent.getLongExtra(
+                            FmRadioIntent.GET_COMP_SCAN, 0);
+                    mHandler.sendMessage(mHandler.obtainMessage(
+                            EVENT_GET_COMP_SCAN, gMuteMode));
+                }
+
                         if (fmAction.equals(FmRadioIntent.GET_MUTE_MODE_ACTION)) {
                     Log.i(TAG, "enter onReceive GET_MUTE_MODE_ACTION " + fmAction);
 
@@ -2443,6 +2589,13 @@ if (MAKE_FM_APIS_BLOCKING == true) {
                         .obtainMessage(EVENT_SET_RDS_AF, 0));
             }
 
+            if (fmAction.equals(FmRadioIntent.SET_WRAP_SEEK_ACTION)) {
+                Log.i(TAG, "enter onReceive SET_WRAP_SEEK_ACTION " + fmAction);
+
+                mHandler.sendMessage(mHandler
+                        .obtainMessage(EVENT_SET_WRAP_SEEK, 0));
+            }
+
             if (fmAction.equals(FmRadioIntent.SET_RDS_SYSTEM_ACTION)) {
                 Log.i(TAG, "enter onReceive SET_RDS_SYSTEM_ACTION " + fmAction);
 
@@ -2508,15 +2661,31 @@ if (MAKE_FM_APIS_BLOCKING == true) {
 
                 int status = extras.getInt(FmRadioIntent.STATUS, 0);
 
+                float station;
+
                 Log.i(TAG, "noOfChannels" + noOfChannels);
 
-                for (int i = 0; i < noOfChannels; i++)
-
+                for (int i = 0; i < noOfChannels; i++) {
                     Log.i(TAG, "channelList" + channelList[i]);
+                    if (i <= 5) {
+                        /* There are only 6 presets, neglect if found more */
+                        station = (float) channelList[i] / 1000;
+
+                        updateSetStation(i, String.valueOf(station), String.valueOf(station));
+                    }
+                }
+
+                txtStatusMsg.setText(R.string.playing);
+
+                imgFmCompScan.setImageResource(R.drawable.fm_start_comp_scan);
 
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_COMPLETE_SCAN_DONE, status, noOfChannels,
                         channelList));
+
+                mToggleCompScan = false;
+                mCompScanStat = true;
+                finishActivity(ACTIVITY_STOPCOMPSCAN);
             }
 
             if (fmAction.equals(FmRadioIntent.COMPLETE_SCAN_STOP_ACTION)) {

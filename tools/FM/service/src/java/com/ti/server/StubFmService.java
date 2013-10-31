@@ -29,6 +29,7 @@ import android.content.IntentFilter;
 import android.os.RemoteException;
 import android.os.Handler;
 import android.media.AudioManager;
+import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
@@ -268,6 +269,34 @@ public class StubFmService extends IFmRadio.Stub implements
         }
     };
 
+    private OnAudioFocusChangeListener afChangeListener = new OnAudioFocusChangeListener() {
+        public void onAudioFocusChange(int focusChange) {
+            if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+                // Pause playback
+                if (rxIsEnabled() && !rxIsFMPaused()) {
+                    Log.d(TAG, "AUDIOFOCUS_LOSS_TRANSIENT Pause FM Radio");
+                    pauseFm();
+                }
+            } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+                // Resume normal playback
+                if (rxIsEnabled() && rxIsFMPaused()) {
+                    Log.d(TAG, "AUDIOFOCUS_GAIN Resume FM Radio");
+                    resumeFm();
+                }
+            } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+                // Stop playback
+                mAudioManager.abandonAudioFocus(afChangeListener);
+                if (rxIsEnabled() && !rxIsFMPaused()) {
+                    Log.d(TAG, "AUDIOFOCUS_LOSS_TRANSIENT Pause FM Radio");
+                    pauseFm();
+                }
+            } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+                // Log.d(TAG, "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
+                // TODO Lower the volume
+            }
+        }
+    };
+
     /*************************************************************************************************
      *  Constructor
      *************************************************************************************************/
@@ -289,6 +318,16 @@ public class StubFmService extends IFmRadio.Stub implements
         mDelayedPauseDisable = new DelayedPauseDisable();
         mDelayedDisableHandler = new Handler();
         mAudioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+        // Request audio focus for playback
+        if (AudioManager.AUDIOFOCUS_REQUEST_GRANTED !=
+            mAudioManager.requestAudioFocus(afChangeListener,
+                                         // Use the music stream.
+                                         AudioManager.STREAM_MUSIC,
+                                         // Request permanent focus.
+                                         AudioManager.AUDIOFOCUS_GAIN)) {
+            // TODO report error
+        }
+
         tmgr = (TelephonyManager) mContext
                 .getSystemService(Context.TELEPHONY_SERVICE);
         tmgr.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
@@ -337,6 +376,9 @@ public class StubFmService extends IFmRadio.Stub implements
         JFmRxStatus status;
         //Log.d(TAG, "StubFmService:  close ");
         try {
+            // Abandon audio focus when playback complete
+            mAudioManager.abandonAudioFocus(afChangeListener);
+
             tmgr.listen(mPhoneStateListener, 0);
             // destroy the underlying FMRX & FMTX
             destroyJFmRx();
@@ -443,12 +485,15 @@ public class StubFmService extends IFmRadio.Stub implements
         mDelayedDisableHandler.removeCallbacks(mDelayedPauseDisable);
         JFmRxStatus status;
         try {
-        /* Tell the music playback service to pause*/
-            // TODO: these constants need to be published somewhere in the
-             //framework
-            Intent i = new Intent("com.android.music.musicservicecommand");
-            i.putExtra("command", "pause");
-            mContext.sendBroadcast(i);
+            // Request audio focus for playback
+            if (AudioManager.AUDIOFOCUS_REQUEST_GRANTED !=
+                mAudioManager.requestAudioFocus(afChangeListener,
+                                             // Use the music stream.
+                                             AudioManager.STREAM_MUSIC,
+                                             // Request permanent focus.
+                                             AudioManager.AUDIOFOCUS_GAIN)) {
+                // TODO report error
+            }
 
             /*
              * register for the master Volume control Intent and music/video
@@ -2072,13 +2117,43 @@ public class StubFmService extends IFmRadio.Stub implements
     }
 
     static int BaseFreq() {
-        return mCurrentBand == FM_BAND_JAPAN ? FM_FIRST_FREQ_JAPAN_KHZ
-                : FM_FIRST_FREQ_US_EUROPE_KHZ;
+        int freq = 0;
+
+        switch(mCurrentBand) {
+            case FM_BAND_JAPAN:
+                freq = FM_FIRST_FREQ_JAPAN_KHZ;
+                break;
+            case FM_BAND_EUROPE_US:
+                freq = FM_FIRST_FREQ_US_EUROPE_KHZ;
+                break;
+            case FM_BAND_RUSSIAN:
+                freq = FM_FIRST_FREQ_RUSSIAN_KHZ;
+                break;
+            case FM_BAND_WEATHER:
+                freq = FM_FIRST_FREQ_WEATHER_KHZ;
+                break;
+            }
+        return freq;
     }
 
     static int LastFreq() {
-        return mCurrentBand == FM_BAND_JAPAN ? FM_LAST_FREQ_JAPAN_KHZ
-                : FM_LAST_FREQ_US_EUROPE_KHZ;
+        int freq = 0;
+
+        switch(mCurrentBand) {
+            case FM_BAND_JAPAN:
+                freq = FM_LAST_FREQ_JAPAN_KHZ;
+                break;
+            case FM_BAND_EUROPE_US:
+                freq = FM_LAST_FREQ_US_EUROPE_KHZ;
+                break;
+            case FM_BAND_RUSSIAN:
+                freq = FM_LAST_FREQ_RUSSIAN_KHZ;
+                break;
+            case FM_BAND_WEATHER:
+                freq = FM_LAST_FREQ_WEATHER_KHZ;
+                break;
+            }
+        return freq;
     }
 
     /*************************************************************************************************
@@ -2883,6 +2958,44 @@ public class StubFmService extends IFmRadio.Stub implements
      * Implementation of IFmRadio IPC interface
      *************************************************************************************************/
 
+    public boolean rxSetWrapSeekMode_nb(int mode) {
+        Log.i(TAG, "StubFmService:rxSetWrapSeekMode_nb  ");
+        if (mRxState != STATE_ENABLED) {
+            Log.e(TAG, "rxSetWrapSeekMode_nb: failed, fm not enabled  state "
+                    + mRxState);
+            return false;
+        }
+        mContext.enforceCallingOrSelfPermission(FMRX_ADMIN_PERM,
+                "Need FMRX_ADMIN_PERM permission");
+
+                if ((mIsSeekInProgress == false) && (mIsTuneInProgress == false)
+        && (mIsCompleteScanInProgress == false)) {
+        JFmRx.JFmRxWrapSeekMode lMode = JFmUtils.getEnumConst(
+                JFmRx.JFmRxWrapSeekMode.class, mode);
+        if (lMode == null) {
+            Log
+                    .e(TAG, "StubFmService:rxSetWrapSeekMode_nb invalid  lMode "
+                            + lMode);
+            return false;
+        }
+        JFmRxStatus status = mJFmRx.setWrapSeekMode(lMode);
+        Log.i(TAG, "mJFmRx.setWrapSeekMode returned status "
+                + status.toString());
+        if (status != JFmRxStatus.PENDING) {
+            Log.e(TAG, "mJFmRx.setWrapSeekMode returned status "
+                    + status.toString());
+
+            return false;
+        }
+
+        } else {
+            Log.e(TAG, "Seek is in progress.cannot call the API");
+            return false;
+        }
+        return true;
+
+    }
+
     public boolean rxSetRdsAfSwitchMode_nb(int mode) {
         Log.i(TAG, "StubFmService:rxSetRdsAfSwitchMode_nb  ");
         if (mRxState != STATE_ENABLED) {
@@ -3255,12 +3368,15 @@ public class StubFmService extends IFmRadio.Stub implements
         mDelayedDisableHandler.removeCallbacks(mDelayedPauseDisable);
         mDelayedDisableHandler.removeCallbacks(mDelayedDisable);
 
-        // Tell the music playback service to pause
-        // TODO: these constants need to be published somewhere in the
-        // framework.
-        Intent i = new Intent("com.android.music.musicservicecommand");
-        i.putExtra("command", "pause");
-        mContext.sendBroadcast(i);
+        // Request audio focus for playback
+        if (AudioManager.AUDIOFOCUS_REQUEST_GRANTED !=
+            mAudioManager.requestAudioFocus(afChangeListener,
+                                         // Use the music stream.
+                                         AudioManager.STREAM_MUSIC,
+                                         // Request permanent focus.
+                                         AudioManager.AUDIOFOCUS_GAIN)) {
+            // TODO report error
+        }
 
            if ((mWakeLock != null) && (mWakeLock.isHeld())) {
                 mWakeLock.release();
@@ -5015,6 +5131,7 @@ public class StubFmService extends IFmRadio.Stub implements
                 mContext.sendBroadcast(intentDisable, FMRX_PERM);
             }
 
+        mIsCompleteScanInProgress = false;
     }
 
     public void fmRxCmdDestroy(JFmRx context, JFmRxStatus status, int command,
@@ -5073,6 +5190,20 @@ public class StubFmService extends IFmRadio.Stub implements
 
 
 
+    }
+
+    public void fmRxCmdSetWrapSeekMode(JFmRx context, JFmRxStatus status,
+            int command, long value) {
+
+        Log.i(TAG, "StubFmService:fmRxCmdSetWrapSeekMode ");
+        Log.d(TAG,
+                "  fmRxCmdSetWrapSeekMode ( command: , status: , value: )"
+                        + command + "" + status + "" + value);
+
+        Log.d(TAG, "StubFmService:sending intent SET_WRAP_SEEK_ACTION");
+        Intent intent = new Intent(FmRadioIntent.SET_WRAP_SEEK_ACTION);
+        intent.putExtra(FmRadioIntent.STATUS, status);
+        mContext.sendBroadcast(intent, FMRX_PERM);
     }
 
     public void fmRxCmdSetRdsAfSwitchMode(JFmRx context, JFmRxStatus status,

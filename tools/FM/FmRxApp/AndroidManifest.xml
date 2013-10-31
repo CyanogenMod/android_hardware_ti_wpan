@@ -29,6 +29,11 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".FmRxCompScan"
+	          android:label="@string/app_name"
+                  android:windowSoftInputMode="stateAlwaysVisible|adjustPan"
+		  android:theme="@android:style/Theme.Dialog">
+	</activity>
 
               <activity android:name=".FmRxHelp"
                   android:label="@string/app_rxhelp">
@@ -50,13 +55,6 @@
 		    	  android:label="@string/app_rds">
     		<intent-filter>
              <action android:name="android.intent.action.RDS_CONFIG" />
-             <category android:name="android.intent.category.DEFAULT" />
-    		</intent-filter>
-		</activity>
-    <activity android:name=".FmPresetList"
-		    	  android:label="@string/stations">
-    		<intent-filter>
-             <action android:name="android.intent.action.PRESET" />
              <category android:name="android.intent.category.DEFAULT" />
     		</intent-filter>
 		</activity>

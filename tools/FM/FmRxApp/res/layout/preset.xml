@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:id="@+id/ParentLayout" android:orientation="vertical"
-	android:background="@drawable/wallpaper7">
+	android:background="@drawable/wallpaper8">
 <ScrollView
 android:id="@+id/scrollview1"
 android:layout_width="fill_parent"
 android:layout_height="fill_parent" android:layout_weight="1">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent" android:background="@drawable/wallpaper7">
+	android:layout_height="fill_parent" android:background="@drawable/wallpaper8">
 	<ListView android:id="@+id/android:list" android:layout_width="fill_parent"
 		android:layout_height="0px" android:layout_weight="1"
 		android:cacheColorHint="#00000000" android:textSize="10sp">

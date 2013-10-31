@@ -3,7 +3,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:id="@+id/ParentLayout" android:orientation="vertical"
-	android:background="@drawable/wallpaper7">
+	android:background="@drawable/wallpaper8">
 	<ScrollView android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/scrollview1"
 		android:layout_weight="1">
@@ -25,8 +25,18 @@
 				</CheckBox>
 			</LinearLayout>
 
-			<LinearLayout android:id="@+id/widget171"
+			<LinearLayout android:id="@+id/widget30"
 				android:layout_below="@+id/widget29" android:layout_alignParentLeft="true"
+				android:layout_width="fill_parent" android:layout_height="50dip">
+				<CheckBox android:id="@+id/chbSetWrapSeek" android:text="@string/wrapseek"
+					 android:layout_marginLeft="15dip"
+					android:layout_height="fill_parent" android:layout_width="fill_parent"
+					android:textSize="20sp" android:layout_weight="1">
+				</CheckBox>
+			</LinearLayout>
+
+			<LinearLayout android:id="@+id/widget171"
+				android:layout_below="@+id/widget30" android:layout_alignParentLeft="true"
 				android:layout_width="fill_parent" android:layout_height="50dip" android:layout_marginTop="10dip">
 				<TextView android:id="@+id/txtRdsSystem" android:text="@string/rdssystem"
 					android:textSize="18sp"

@@ -53,6 +53,7 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
     private EditText textRssi;
     private CheckBox chbRdsMode;
     private CheckBox chbSetRdsAf;
+    private CheckBox chbSetWrapSeek;
     private ArrayAdapter<String> bandAdapter;
     private ArrayAdapter<String> channelSpaceAdapter;
     private ArrayAdapter<String> deEmpAdapter;
@@ -112,6 +113,9 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
 
         chbSetRdsAf = (CheckBox) findViewById(R.id.chbSetRdsAf);
         chbSetRdsAf.setOnCheckedChangeListener(this);
+
+        chbSetWrapSeek = (CheckBox) findViewById(R.id.chbSetWrapSeek);
+        chbSetWrapSeek.setOnCheckedChangeListener(this);
     }
 
     /**
@@ -128,6 +132,8 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
         spnBand.setAdapter(bandAdapter);
         bandAdapter.add("European");
         bandAdapter.add("Japanese");
+        bandAdapter.add("Russian");
+        bandAdapter.add("Weather");
         spnBand.setOnItemSelectedListener(gItemSelectedHandler);
 
         // ChannelSpace Spinner
@@ -260,6 +266,14 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
                 setEmptySpinner();
             }
             break;
+        case R.id.chbSetWrapSeek:
+            if (isChecked)
+                chbSetWrapSeek.setEnabled(true);
+	    else {
+                chbSetWrapSeek.setChecked(false);
+                chbSetWrapSeek.setEnabled(false);
+            }
+            break;
 
         default:
             break;
@@ -357,6 +371,9 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
                     DEFAULT_RDS_SYSTEM));
         }
 
+        chbSetWrapSeek.setChecked(fmConfigPreferences.getBoolean(WRAPSEEK,
+                DEFAULT_WRAP_SEEK));
+
         textRssi.setText(fmConfigPreferences.getString(RSSI_STRING,
                 DEF_RSSI_STRING));
 
@@ -404,6 +421,11 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
             editor.putBoolean(RDS, DEFAULT_RDS);
             editor.putInt(RDSSYSTEM, DEFAULT_RDS_SYSTEM);
         }
+
+        if (chbSetWrapSeek.isChecked())
+            editor.putBoolean(WRAPSEEK, chbSetWrapSeek.isChecked());
+        else
+            editor.putBoolean(WRAPSEEK, DEFAULT_WRAP_SEEK);
 
         editor.putInt(BAND, spnBand.getSelectedItemPosition());
 

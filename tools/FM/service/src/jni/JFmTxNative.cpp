@@ -214,6 +214,7 @@ static int nativeJFmTx_Tune(JNIEnv *env, jobject obj,jlong jContextValue,jlong u
     V4L2_JBTL_LOGD("nativeJFmRx_tune(): Entered");
 
     vf.tuner = 0;
+    vf.type = V4L2_TUNER_RADIO;
     vf.frequency = rint(user_freq * 16 + 0.5);
 
     status = ioctl(radio_fd, VIDIOC_S_FREQUENCY, &vf);

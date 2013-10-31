@@ -8,7 +8,7 @@
 	<string name="stations">FM Radio Stations</string>
 	<string name="txtplatform">V4L2 based solution for Android </string>
 	<string name="lblversion">Version:</string>
-	<string name="txtversion">0.1</string>
+	<string name="txtversion">1.0</string>
 	<string name="app_rxtune">Enter Frequency</string>
 	<string name="app_rxhelp">About</string>
 	<string name="radioTxt"> </string>
@@ -38,6 +38,8 @@
 	<string name="app_rds">FM Configurations</string>
 	<string name="freqRangeEurope"> 87.50MHz - 108.00MHz </string>
 	<string name="freqRangeJapan"> 76MHz - 90MHz </string>
+	<string name="freqRangeRussian"> 65.8MHz - 74MHz </string>
+	<string name="freqRangeWeather"> 162.4MHz - 162.55MHz </string>
 	<string name="label"> MHz </string>
 	<string name="labelhz"> MHz </string>
 	<string name="rx_freq_val"> </string>
@@ -70,6 +72,7 @@
 	<string name="about">About</string>
 	<string name="preset">Preset</string>
 	<string name="rdsaf">Set RDS AF</string>
+	<string name="wrapseek">Enable wrap seek</string>
 	<string name="announcement">Announcement</string>
 	<string name="TA">TA</string>
 	<string name="connecting ">Connecting ....</string>
@@ -87,6 +90,9 @@
 	<string name="rdssystem">RDS System:</string>
 	<string name="number">Enter valid number</string>
 	<string name="seeking">Seeking ....</string>
+	<string name="scaning">Scaning ....</string>
+	<string name="CompScanRunning">Complete Scanning...</string>
+	<string name="CompScanStop">STOP</string>
 	<string name="playing">Playing ....</string>
 	<string name="pstxt"></string>
 	<string name="index">Index</string>
