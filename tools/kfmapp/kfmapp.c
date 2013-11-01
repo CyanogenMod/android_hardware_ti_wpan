@@ -731,7 +731,7 @@ exit:
 
 int fmapp_get_rx_rssi_threshold(void)
 {
-    unsigned char fm_rssi_threshhold;
+    unsigned char fm_rssi_threshhold[4];
     int fd, res;
 
     fd = open(FMRX_RSSI_LVL_SYSFS_ENTRY, O_RDONLY);
@@ -746,6 +746,7 @@ int fmapp_get_rx_rssi_threshold(void)
                 FMRX_RSSI_LVL_SYSFS_ENTRY,strerror(res));
         goto exit;
     }
+    fm_rssi_threshhold[3] = '\0';
 
     printf("Current FM RSSI threshold level is %d \n",
             atoi((char *) &fm_rssi_threshhold));
