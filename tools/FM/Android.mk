@@ -15,7 +15,7 @@
 #  limitations under the License.
 #
 #TO Check whether we need any flags to enable FM
-ifeq ($(CFG_FM_SERVICE_TI),yes)
+ifneq ($(TARGET_PROVIDES_TI_FM_SERVICE),true)
   include hardware/ti/wpan/tools/FM/FmRxApp/Android.mk
   include hardware/ti/wpan/tools/FM/FmTxApp/Android.mk
   include hardware/ti/wpan/tools/FM/service/Android.mk
