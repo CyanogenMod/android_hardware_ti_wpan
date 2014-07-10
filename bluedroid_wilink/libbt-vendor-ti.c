@@ -121,6 +121,9 @@ int ti_op(bt_vendor_opcode_t opcode, void **param) {
         case BT_VND_OP_FW_CFG:
             bt_vendor_cbacks->fwcfg_cb(BT_VND_OP_RESULT_SUCCESS);
             break;
+        case BT_VND_OP_EPILOG:
+            bt_vendor_cbacks->epilog_cb(BT_VND_OP_RESULT_SUCCESS);
+            break;
         default:
             ALOGW("Unknown opcode: %d", opcode);
             break;
