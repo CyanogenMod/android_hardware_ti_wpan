@@ -29,12 +29,6 @@
 #include <bt_hci_bdroid.h>
 #include <utils.h>
 
-/**
- * TODO: check/fix this value
- * Low power mode: default transport idle timer
- */
-#define WL_DEFAULT_LPM_IDLE_TIMEOUT 200
-
 #define BT_HCI_TTY_DEVICE_NAME "/dev/hci_tty"
 
 bt_vendor_callbacks_t *bt_vendor_cbacks = NULL;
@@ -97,22 +91,8 @@ int ti_op(bt_vendor_opcode_t opcode, void **param) {
 
     switch(opcode)
     {
+        /* Dummy */
         case BT_VND_OP_POWER_CTRL:
-            break;
-        case BT_VND_OP_SCO_CFG:
-            break;
-        case BT_VND_OP_GET_LPM_IDLE_TIMEOUT:
-            *((uint32_t *) param) = WL_DEFAULT_LPM_IDLE_TIMEOUT;
-            break;
-        case BT_VND_OP_LPM_SET_MODE:
-            break;
-        case BT_VND_OP_LPM_WAKE_SET_STATE:
-            break;
-        case BT_VND_OP_USERIAL_OPEN:
-            ret = ti_hcitty_open(param);
-            break;
-        case BT_VND_OP_USERIAL_CLOSE:
-            ret = ti_hcitty_close();
             break;
         /* Since new stack expects fwcfg_cb we are returning SUCCESS here
          * in actual, firmware download is already happened when /dev/hci_tty
@@ -121,6 +101,27 @@ int ti_op(bt_vendor_opcode_t opcode, void **param) {
         case BT_VND_OP_FW_CFG:
             bt_vendor_cbacks->fwcfg_cb(BT_VND_OP_RESULT_SUCCESS);
             break;
+        /* Return dummy success */
+        case BT_VND_OP_SCO_CFG:
+            bt_vendor_cbacks->scocfg_cb(BT_VND_OP_RESULT_SUCCESS);
+            break;
+        case BT_VND_OP_USERIAL_OPEN:
+            ret = ti_hcitty_open(param);
+            break;
+        case BT_VND_OP_USERIAL_CLOSE:
+            ret = ti_hcitty_close();
+            break;
+        /* Dummy */
+        case BT_VND_OP_GET_LPM_IDLE_TIMEOUT:
+            break;
+        /* Return dummy success */
+        case BT_VND_OP_LPM_SET_MODE:
+            bt_vendor_cbacks->lpm_cb(BT_VND_OP_RESULT_SUCCESS);
+            break;
+        /* Dummy */
+        case BT_VND_OP_LPM_WAKE_SET_STATE:
+            break;
+        /* Return dummy success */
         case BT_VND_OP_EPILOG:
             bt_vendor_cbacks->epilog_cb(BT_VND_OP_RESULT_SUCCESS);
             break;
