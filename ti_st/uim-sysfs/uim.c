@@ -28,6 +28,8 @@
 #include <sys/stat.h>
 #include <sys/utsname.h>
 #include "uim.h"
+#include <asm-generic/termbits.h>
+#include <asm-generic/ioctls.h>
 #ifdef ANDROID
 #include <private/android_filesystem_config.h>
 #include <cutils/log.h>
