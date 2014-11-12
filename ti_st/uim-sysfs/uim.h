@@ -69,18 +69,6 @@
 #endif
 #endif  /* ANDROID */
 
-/*Termios2 structure for setting the Custom baud rate*/
-struct termios2 {
-	tcflag_t c_iflag;       /* input mode flags */
-	tcflag_t c_oflag;       /* output mode flags */
-	tcflag_t c_cflag;       /* control mode flags */
-	tcflag_t c_lflag;       /* local mode flags */
-	cc_t c_line;            /* line discipline */
-	cc_t c_cc[ARM_NCCS];    /* control characters */
-	speed_t c_ispeed;       /* input speed */
-	speed_t c_ospeed;       /* output speed */
-};
-
 /* HCI command header*/
 typedef struct {
 	uint16_t        opcode;         /* OCF & OGF */
