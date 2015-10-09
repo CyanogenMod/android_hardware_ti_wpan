@@ -17,7 +17,11 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_C_INCLUDES := external/bluetooth/bluedroid/hci/include
+BDROID_DIR:= system/bt
+
+LOCAL_C_INCLUDES := \
+    $(BDROID_DIR)/hci/include \
+    $(BDROID_DIR)/stack/include
 
 LOCAL_CFLAGS := -g -c -W -Wall -O2 -D_POSIX_SOURCE
 
