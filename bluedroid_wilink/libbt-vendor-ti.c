@@ -72,6 +72,10 @@ void ti_cleanup(void) {
     bt_vendor_cbacks = NULL;
 }
 
+void ti_ssr_cleanup(int reason) {
+    ALOGI("vendor ssr cleanup");
+}
+
 int ti_hcitty_open(int *fd_array) {
     int fd;
     fd = open(BT_HCI_TTY_DEVICE_NAME, O_RDWR);
@@ -133,6 +137,7 @@ const bt_vendor_interface_t BLUETOOTH_VENDOR_LIB_INTERFACE  = {
     .init = ti_init,
     .op = ti_op,
     .cleanup = ti_cleanup,
+    .ssr_cleanup = ti_ssr_cleanup,
 };
 
 int main()
